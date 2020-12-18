@@ -28,6 +28,8 @@ FORMS += \
 TRANSLATIONS += \
     Transport_Technologies_Test_ru_RU.ts
 
+QT += xml
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
