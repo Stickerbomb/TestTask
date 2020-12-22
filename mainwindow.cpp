@@ -8,7 +8,8 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow),
+      model(nullptr)
 {
     ui->setupUi(this);
 
@@ -33,14 +34,14 @@ void MainWindow::on_choose_file_button_clicked()
 
     model->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
 //    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Attributes")));
-//    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Text")));
+//    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Text")));
 }
 
 void MainWindow::Read(QString Filename)
 {
 
 //    QDomDocument document;
-    delete model;
+    if(model) delete model;
     QStandardItem *root = new QStandardItem("Root");
     model = new QStandardItemModel(0,1,this);
     model->appendRow(root);
@@ -92,13 +93,13 @@ void MainWindow::Show(const QDomNode &_elem, QStandardItem *_Model)
             }
 
             QString atr;
-            // QStringList to QList<QStandartItem> for appending to columns
-            QList<QStandardItem*> *temp = new QList<QStandardItem*>;
+            // QStringList to QList<QStandartItem*> for appending to columns
+            QList<QStandardItem*> *list_attr = new QList<QStandardItem*>;
             for ( const auto& i : attributes  ){
 //                qDebug() << i;
                 atr += i;
-                QStandardItem *cratch = new QStandardItem(i);
-                temp->append(cratch);
+                QStandardItem *single_attr = new QStandardItem(i);
+                list_attr->append(single_attr);
             }
 //             QStandardItem *cratch = new QStandardItem(temp);
 //            temp->append(cratch);
@@ -109,10 +110,12 @@ void MainWindow::Show(const QDomNode &_elem, QStandardItem *_Model)
 //            }
 
             _Model->appendRow(nodeText);
-            nodeText->appendColumn(*temp);
+            nodeText->appendColumn(*list_attr);
             if(domNode.hasChildNodes()){
                 Show(domNode, nodeText);
             }
+//            if(!domNode.hasChildNodes())
+//               {}
         }
         domNode = domNode.nextSibling();
     }
