@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "classes.h"
 #include "ui_mainwindow.h"
 
 #include <QtDebug>
@@ -29,21 +30,19 @@ void MainWindow::on_choose_file_button_clicked()
                                               tr("Xml files (*.xml)"));
 
     if(filename != ""){
-               Read(filename);
+               read(filename);
     }
 
     model->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
-//    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Attributes")));
-//    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Text")));
+    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Attributes")));
+    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Text")));
 }
 
-void MainWindow::Read(QString Filename)
+void MainWindow::read(QString Filename)
 {
-
-//    QDomDocument document;
     if(model) delete model;
     QStandardItem *root = new QStandardItem("Root");
-    model = new QStandardItemModel(0,1,this);
+    model = new QStandardItemModel(0,3,this);
     model->appendRow(root);
     ui->treeView->setModel(model);
 
@@ -57,22 +56,12 @@ void MainWindow::Read(QString Filename)
 
     //get the xml root element
     QDomNode xmlroot = document.documentElement();
-    Show(xmlroot,root);
-    //read the books
-    QDomNode nodeList = xmlroot;
-//     const QModelIndex a = *new QModelIndex();
-//    for (int i =0; i< model->rowCount() ; i++) {
-//        qDebug() << model->data( a,1);
-//    }
+    traverseShow(xmlroot,root);
+
 
 }
 
-void MainWindow::Write(QString root)
-{
-
-}
-
-void MainWindow::Show(const QDomNode &_elem, QStandardItem *_Model)
+void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
 {
     QDomNode domNode = _elem.firstChild();
     while(!domNode.isNull())
@@ -80,8 +69,6 @@ void MainWindow::Show(const QDomNode &_elem, QStandardItem *_Model)
         if(domNode.isElement())
         {
             QDomElement domElement = domNode.toElement();
-            QStandardItem *nodeText = new QStandardItem(domElement.nodeName());
-//            qDebug() << domElement.nodeName() ;
 
 
             const QDomNamedNodeMap attributeMap = domNode.attributes();
@@ -92,62 +79,110 @@ void MainWindow::Show(const QDomNode &_elem, QStandardItem *_Model)
                               + attribute.nodeValue() + '"';
             }
 
-            QString atr;
             // QStringList to QList<QStandartItem*> for appending to columns
-            QList<QStandardItem*> *list_attr = new QList<QStandardItem*>;
+            QString atr;
             for ( const auto& i : attributes  ){
-//                qDebug() << i;
-                atr += i;
-                QStandardItem *single_attr = new QStandardItem(i);
-                list_attr->append(single_attr);
+                atr += i + " ";
             }
-//             QStandardItem *cratch = new QStandardItem(temp);
-//            temp->append(cratch);
-//           qDebug() << _Model->column();
 
-//            for ( const auto& i : *temp  ){
-//                qDebug() << " (" << i->text() << ") ";
-//            }
+            QStandardItem *node = new QStandardItem(domElement.nodeName());
+            QStandardItem *atr_item = new QStandardItem(atr);
+            QStandardItem *text_item = new QStandardItem(domElement.text());
+            qDebug() << domElement.nodeName() << atr << domElement.text();
 
-            _Model->appendRow(nodeText);
-            nodeText->appendColumn(*list_attr);
+            node->setChild(0, 1, atr_item);
+            node->setChild(0, 2, text_item);
+            _Model->appendRow(node);
             if(domNode.hasChildNodes()){
-                Show(domNode, nodeText);
+                traverseShow(domNode, node);
             }
-//            if(!domNode.hasChildNodes())
-//               {}
         }
         domNode = domNode.nextSibling();
     }
 }
 
+void MainWindow::write(QStandardItem *item, QDomDocument &dom_root)
+{
+    QDomElement tem_node =dom_root.createElement(model->item(0,0)->text());
+    qDebug() << model->item(0,0)->text();
+//    tem_node.setAttribute();
+}
+
 void MainWindow::on_choose_file_button_2_clicked()
 {
-//    QDomDocument document;
+//    QDomDocument dom_doc;
 //    QDomElement xmlroot = document.createElement("Root");
-//       document.appendChild(xmlroot);
-
-
-
+//    dom_doc.appendChild(xmlroot);
+//    write(model->item(0,0),dom_doc);
 
 
 
     //Сохранить в файл
     QString file_name;
-    QString filename = QFileDialog::getOpenFileName(this,
+    QString filename = QFileDialog::getSaveFileName(this,
                                               tr("Open Xml"), ".",
                                               tr("Xml files (*.xml)"));
 
-    if(filename != ""){
-               Read(filename);
-    }
     QFile file(filename);
-       if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-       {
-           qDebug() << "Failed to write file";
-       }
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "Failed to write file";
+    }
 
-       QTextStream stream(&file);
-       stream << document.toString();
-       file.close();
+    QTextStream stream(&file);
+    stream << document.toString();
+    file.close();
+}
+
+//Работа с Json
+void MainWindow::on_Load_from_json_Button_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                              tr("Open JSON"), ".",
+                                              tr("Json files (*.json)"));
+    QString val;
+    QFile file(filename);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    val = file.readAll();
+    file.close();
+    jsondocument = QJsonDocument::fromJson(val.toUtf8());
+    QJsonObject sett2 = jsondocument.object();
+    serializer.fromJson(val.toUtf8());
+    document = serializer.appendXmlHat(serializer.toXml(),"UTF-8");
+    QDomNode xmlroot = document.documentElement();
+    qDebug() << xmlroot.nodeName();
+
+    TestXml src;
+    QDomDocument node = QSerializer::appendXmlHat(src.toXml(), "UTF-8");
+        qDebug()<<QSerializer::toByteArray(node).constData();
+
+    if(model) delete model;
+    QStandardItem *root = new QStandardItem("Root");
+    model = new QStandardItemModel(0,3,this);
+    model->appendRow(root);
+    ui->treeView->setModel(model);
+    traverseShow(xmlroot,root);
+}
+
+
+
+void MainWindow::on_Save_to_json_Button_clicked()
+{
+    QJsonDocument JsonDocument = QJsonDocument(serializer.toJson());
+    QJsonObject RootObject = JsonDocument.object();
+    JsonDocument.setObject(RootObject); // set to json document
+
+    QString file_name;
+    QString filename = QFileDialog::getSaveFileName(this,
+                                              tr("Open Xml"), ".",
+                                              tr("Xml files (*.xml)"));
+
+    QFile file(filename);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "Failed to write file";
+    }
+    file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
+    file.write(JsonDocument.toJson());
+    file.close();
 }

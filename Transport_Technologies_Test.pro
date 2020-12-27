@@ -20,7 +20,10 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
-    mainwindow.h
+    classes.h \
+    mainwindow.h \
+    qserializer.h
+    qserializer.h
 
 FORMS += \
     mainwindow.ui

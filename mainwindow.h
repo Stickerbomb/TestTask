@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-
+#include "qserializer.h"
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QtXml>
@@ -23,12 +23,18 @@ private slots:
 
     void on_choose_file_button_2_clicked();
 
+    void on_Load_from_json_Button_clicked();
+
+    void on_Save_to_json_Button_clicked();
+
 private:
+    QSerializer serializer;
+    QJsonDocument jsondocument;
     QDomDocument document;
     Ui::MainWindow *ui;
     QStandardItemModel *model;
-    void Read(QString _noed);
-    void Write(QString _root);
-    void Show(const QDomNode &_elem, QStandardItem *subModel);
+    void read(QString _noed);
+    void write(QStandardItem *item, QDomDocument &dom_root);
+    void traverseShow(const QDomNode &_elem, QStandardItem *subModel);
 };
 #endif // MAINWINDOW_H

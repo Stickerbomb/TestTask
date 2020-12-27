@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Выбрать файл</string>
+     <string>Выбрать XML файл</string>
     </property>
    </widget>
    <widget class="QPushButton" name="choose_file_button_2">
@@ -51,6 +51,32 @@
     </property>
     <property name="editTriggers">
      <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Save_to_json_Button">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>20</y>
+      <width>121</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Сохранить в JSON</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Load_from_json_Button">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>131</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Выбрать JSON файл</string>
     </property>
    </widget>
   </widget>
