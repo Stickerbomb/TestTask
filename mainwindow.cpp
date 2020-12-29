@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "classes.h"
 #include "ui_mainwindow.h"
 
 #include <QtDebug>
@@ -101,6 +100,63 @@ void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
     }
 }
 
+QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray)
+{
+    qDebug() << jarray;
+    QStandardItem *result = new QStandardItem();
+    int i = 0;
+    foreach(const QJsonValue &value, jarray){
+        QStandardItem *item;
+        if(value.isDouble())
+            item = new QStandardItem(value.toDouble());
+        if(value.isArray()) {
+            const QJsonArray temp = value.toArray();
+            item = toStdItem(temp);
+            }
+        if(value.isObject())
+            item = new QStandardItem(1);
+        if(value.isString())
+            item = new QStandardItem(value.toString());
+        if(value.isBool())
+            item = new QStandardItem(value.toBool());
+        result->setChild(i,1,item);
+        i++;
+    }
+    return result;
+}
+
+QStandardItem *MainWindow::toStdItem(const QJsonObject &jo)
+{
+//    qDebug() << jo;
+    QStandardItem *item;
+    QStandardItem *result = new QStandardItem();
+    foreach(const QString & str, jo.keys()){
+        item = new QStandardItem(str);
+        QStandardItem *item_value;
+//        qDebug() << str;
+
+        if(jo.value(str).isDouble())
+            item_value = new QStandardItem(jo.value(str).toDouble());
+
+        if(jo.value(str).isArray())
+            item_value = toStdItem(jo.value(str).toArray());
+
+        if(jo.value(str).isObject())
+            item_value = toStdItem(jo.value(str).toObject());
+
+        if(jo.value(str).isString())
+             item_value = new QStandardItem(jo.value(str).toString());
+
+        if(jo.value(str).isBool())
+             item_value = new QStandardItem(jo.value(str).toBool());
+
+        result->appendRow(item);
+        item->setChild(0,1,item_value);
+        qDebug() << item->text() <<item_value->text();
+    }
+    return result;
+}
+
 void MainWindow::write(QStandardItem *item, QDomDocument &dom_root)
 {
     QDomElement tem_node =dom_root.createElement(model->item(0,0)->text());
@@ -137,6 +193,12 @@ void MainWindow::on_choose_file_button_2_clicked()
 //Работа с Json
 void MainWindow::on_Load_from_json_Button_clicked()
 {
+    if(model) delete model;
+    model = new QStandardItemModel(0,3,this);
+    QStandardItem *root = new QStandardItem("Root");
+    model->appendRow(root);
+    ui->treeView->setModel(model);
+
     QString filename = QFileDialog::getOpenFileName(this,
                                               tr("Open JSON"), ".",
                                               tr("Json files (*.json)"));
@@ -145,30 +207,20 @@ void MainWindow::on_Load_from_json_Button_clicked()
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     val = file.readAll();
     file.close();
+
     jsondocument = QJsonDocument::fromJson(val.toUtf8());
     QJsonObject sett2 = jsondocument.object();
-    serializer.fromJson(val.toUtf8());
-    document = serializer.appendXmlHat(serializer.toXml(),"UTF-8");
-    QDomNode xmlroot = document.documentElement();
-    qDebug() << xmlroot.nodeName();
 
-    TestXml src;
-    QDomDocument node = QSerializer::appendXmlHat(src.toXml(), "UTF-8");
-        qDebug()<<QSerializer::toByteArray(node).constData();
+    model->appendRow(toStdItem(sett2));
 
-    if(model) delete model;
-    QStandardItem *root = new QStandardItem("Root");
-    model = new QStandardItemModel(0,3,this);
-    model->appendRow(root);
-    ui->treeView->setModel(model);
-    traverseShow(xmlroot,root);
+
 }
 
 
 
 void MainWindow::on_Save_to_json_Button_clicked()
 {
-    QJsonDocument JsonDocument = QJsonDocument(serializer.toJson());
+    QJsonDocument JsonDocument = QJsonDocument();
     QJsonObject RootObject = JsonDocument.object();
     JsonDocument.setObject(RootObject); // set to json document
 
