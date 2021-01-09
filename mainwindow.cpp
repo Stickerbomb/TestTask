@@ -33,15 +33,15 @@ void MainWindow::on_choose_file_button_clicked()
     }
 
     model->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
-    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Attributes")));
-    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Text")));
+//    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Attributes")));
+//    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Text")));
 }
 
 void MainWindow::read(QString Filename)
 {
     if(model) delete model;
     QStandardItem *root = new QStandardItem("Root");
-    model = new QStandardItemModel(0,3,this);
+    model = new QStandardItemModel(0,1,this);
     model->appendRow(root);
     ui->treeView->setModel(model);
 
@@ -89,8 +89,8 @@ void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
             QStandardItem *text_item = new QStandardItem(domElement.text());
             qDebug() << domElement.nodeName() << atr << domElement.text();
 
-            node->setChild(0, 1, atr_item);
-            node->setChild(0, 2, text_item);
+            node->appendRow(atr_item);
+            node->appendRow(text_item);
             _Model->appendRow(node);
             if(domNode.hasChildNodes()){
                 traverseShow(domNode, node);
@@ -100,59 +100,92 @@ void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
     }
 }
 
-QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray)
+QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
 {
-    qDebug() << jarray;
-    QStandardItem *result = new QStandardItem();
-    int i = 0;
+    qDebug() << jarray << "  1  ";
+    QStandardItem *result = new QStandardItem(parent);
+    QString str;
+    QStandardItem *item;
+
     foreach(const QJsonValue &value, jarray){
-        QStandardItem *item;
-        if(value.isDouble())
-            item = new QStandardItem(value.toDouble());
-        if(value.isArray()) {
-            const QJsonArray temp = value.toArray();
-            item = toStdItem(temp);
-            }
-        if(value.isObject())
-            item = new QStandardItem(1);
-        if(value.isString())
-            item = new QStandardItem(value.toString());
-        if(value.isBool())
-            item = new QStandardItem(value.toBool());
-        result->setChild(i,1,item);
-        i++;
+        if(value.isDouble()) {
+            str += QString::number(value.toInt()) +", ";
+        }
+
+        if(value.isString()) {
+                str += "\"" + value.toString() +"\", ";
+        }
+        if(value.isBool()) {
+                QString tem_str = value.toBool() ? "true" : "false" ;
+                str += tem_str + ", ";
+        }
+        if(value.isObject()){
+            QStandardItem *temp = toStdItem(value.toObject(),parent);
+
+        }
     }
+    if(str!=""){
+        str = str.remove(str.length()-2,2);
+    }
+    item = new QStandardItem(str);
+    result->appendRow(item);
+
     return result;
 }
 
-QStandardItem *MainWindow::toStdItem(const QJsonObject &jo)
+QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
 {
-//    qDebug() << jo;
     QStandardItem *item;
-    QStandardItem *result = new QStandardItem();
+    QStandardItem *result = new QStandardItem(parent);
     foreach(const QString & str, jo.keys()){
         item = new QStandardItem(str);
         QStandardItem *item_value;
-//        qDebug() << str;
+        QString str_value;
 
-        if(jo.value(str).isDouble())
-            item_value = new QStandardItem(jo.value(str).toDouble());
+        // Надо проврить тип данных, придется громоздко через if/else
 
-        if(jo.value(str).isArray())
-            item_value = toStdItem(jo.value(str).toArray());
+        if(jo.value(str).isDouble()){
+            str_value = QString::fromStdString(std::to_string(jo.value(str).toDouble()));
+            qDebug() << str_value << " 2 ";
+            item_value = new QStandardItem(str_value);
+            item->appendRow(item_value);
+        }
+        else{
+            if(jo.value(str).isString()){
+                str_value = jo.value(str).toString();
+                qDebug() << str_value << " 2 ";
+                item_value = new QStandardItem(str_value);
+                item->appendRow(item_value);
+            }
+            else{
 
-        if(jo.value(str).isObject())
-            item_value = toStdItem(jo.value(str).toObject());
+                if(jo.value(str).isBool()){
+                     str_value = jo.value(str).toBool() ? "true" : "false";
+                     qDebug() << str_value << " 2 ";
+                     item_value = new QStandardItem(str_value);
+                     item->appendRow(item_value);
+                }
+                else{
 
-        if(jo.value(str).isString())
-             item_value = new QStandardItem(jo.value(str).toString());
+                    if(jo.value(str).isArray()){
+                        item = toStdItem(jo.value(str).toArray(), str);
+                        item_value = new QStandardItem();
+                        qDebug() << str << "ARRAY 2 ";
+                    }
 
-        if(jo.value(str).isBool())
-             item_value = new QStandardItem(jo.value(str).toBool());
+                    if(jo.value(str).isObject()){
+                        item = toStdItem(jo.value(str).toObject(), str);
+                        item_value = new QStandardItem();
+                        qDebug() << str << "OBJECT 2 ";
+                    }
+                }
+            }
+        }
 
         result->appendRow(item);
-        item->setChild(0,1,item_value);
-        qDebug() << item->text() <<item_value->text();
+
+
+        qDebug() << item->text() << item_value->text() << " 11 ";
     }
     return result;
 }
@@ -195,8 +228,6 @@ void MainWindow::on_Load_from_json_Button_clicked()
 {
     if(model) delete model;
     model = new QStandardItemModel(0,3,this);
-    QStandardItem *root = new QStandardItem("Root");
-    model->appendRow(root);
     ui->treeView->setModel(model);
 
     QString filename = QFileDialog::getOpenFileName(this,
@@ -211,11 +242,11 @@ void MainWindow::on_Load_from_json_Button_clicked()
     jsondocument = QJsonDocument::fromJson(val.toUtf8());
     QJsonObject sett2 = jsondocument.object();
 
-    model->appendRow(toStdItem(sett2));
+    QStandardItem *root = toStdItem(sett2,"Root");
+    model->appendRow(root);
 
 
 }
-
 
 
 void MainWindow::on_Save_to_json_Button_clicked()
