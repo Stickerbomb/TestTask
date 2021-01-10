@@ -87,8 +87,6 @@ void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
             QStandardItem *node = new QStandardItem(domElement.nodeName());
             QStandardItem *atr_item = new QStandardItem(atr);
             QStandardItem *text_item = new QStandardItem(domElement.text());
-            qDebug() << domElement.nodeName() << atr << domElement.text();
-
             node->appendRow(atr_item);
             node->appendRow(text_item);
             _Model->appendRow(node);
@@ -98,6 +96,13 @@ void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
         }
         domNode = domNode.nextSibling();
     }
+}
+
+QDomNode MainWindow::toDomNode(const QStandardItem &parent)
+{
+    QDomNode result;
+//    foreach(const QStandardItem &currentItem, parent.ch)
+    return result;
 }
 
 QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
@@ -121,7 +126,7 @@ QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
         }
         if(value.isObject()){
             QStandardItem *temp = toStdItem(value.toObject(),parent);
-
+            result->appendRow(temp);
         }
     }
     if(str!=""){
@@ -190,11 +195,38 @@ QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
     return result;
 }
 
-void MainWindow::write(QStandardItem *item, QDomDocument &dom_root)
+void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
 {
-    QDomElement tem_node =dom_root.createElement(model->item(0,0)->text());
-    qDebug() << model->item(0,0)->text();
-//    tem_node.setAttribute();
+    QDomElement domelem;
+
+    domelem = document.createElement(item->text());
+
+    for(int i = 0; i< item->rowCount(); i++){
+        if(item->hasChildren()){
+            QStringList listArguments = item->child(0,0)->text().split(' ');
+            foreach(QString attr, listArguments){
+                QStringList param = attr.split('=');
+                param.first().remove('\"');
+                param.last().remove('\"');
+                domelem.setAttribute(param.first(),param.last());
+            }
+
+            //Debug section
+            const QDomNamedNodeMap attributeMap = domelem.attributes();
+            QStringList attributes;
+            for (int j = 0; j < attributeMap.count(); ++j) {
+                QDomNode attribute = attributeMap.item(j);
+                attributes << attribute.nodeName() + "= "
+                              + attribute.nodeValue() + ' ';
+            }
+            qDebug() << attributes << "  ATRIBUTES  " <<i;
+            // end Debug section
+
+            write(item->child(i,0),domelem);
+        }
+    }
+    dom_root.appendChild(domelem);
+
 }
 
 void MainWindow::on_choose_file_button_2_clicked()
@@ -203,8 +235,10 @@ void MainWindow::on_choose_file_button_2_clicked()
 //    QDomElement xmlroot = document.createElement("Root");
 //    dom_doc.appendChild(xmlroot);
 //    write(model->item(0,0),dom_doc);
+    if(model){
+        write(model->item(0,0),document);
 
-
+    }
 
     //Сохранить в файл
     QString file_name;

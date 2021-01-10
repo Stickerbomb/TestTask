@@ -32,8 +32,9 @@ private:
     Ui::MainWindow *ui;
     QStandardItemModel *model;
     void read(QString _noed);
-    void write(QStandardItem *item, QDomDocument &dom_root);
+    void write(QStandardItem *item, QDomNode &dom_root);
     void traverseShow(const QDomNode &_elem, QStandardItem *subModel);
+    QDomNode toDomNode(const QStandardItem &parent);
     QStandardItem* toStdItem(const QJsonArray &jarray, QString parent);
     QStandardItem* toStdItem(const QJsonObject &jo, QString parent);
 };
