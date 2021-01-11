@@ -197,19 +197,20 @@ QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
 
 void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
 {
-    QDomElement domelem;
-
-    domelem = document.createElement(item->text());
 
     for(int i = 0; i< item->rowCount(); i++){
-        if(item->hasChildren()){
-            QStringList listArguments = item->child(0,0)->text().split(' ');
+        if(item->child(i,0)->hasChildren()){
+            QDomElement domelem = document.createElement(item->child(i,0)->text());
+            QStringList listArguments = item->child(i,0)->child(0,0)->text().split(' ');
+            listArguments.removeLast();
             foreach(QString attr, listArguments){
                 QStringList param = attr.split('=');
                 param.first().remove('\"');
                 param.last().remove('\"');
                 domelem.setAttribute(param.first(),param.last());
             }
+            domelem.setNodeValue(item->child(i,0)->child(1,0)->text());
+            dom_root.appendChild(domelem);
 
             //Debug section
             const QDomNamedNodeMap attributeMap = domelem.attributes();
@@ -219,13 +220,13 @@ void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
                 attributes << attribute.nodeName() + "= "
                               + attribute.nodeValue() + ' ';
             }
-            qDebug() << attributes << "  ATRIBUTES  " <<i;
             // end Debug section
+            qDebug() <<attributes << "  ATRIBUTES  ";
 
             write(item->child(i,0),domelem);
         }
     }
-    dom_root.appendChild(domelem);
+
 
 }
 
