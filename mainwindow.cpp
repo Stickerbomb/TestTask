@@ -243,8 +243,11 @@ void MainWindow::on_choose_file_button_2_clicked()
 //    QDomElement xmlroot = document.createElement("Root");
 //    dom_doc.appendChild(xmlroot);
 //    write(model->item(0,0),dom_doc);
+    document.clear();
     if(model){
-        write(model->item(0,0),document);
+        QDomNode root = document.createElement((model->item(0,0)->text()));
+        write(model->item(0,0),root);
+        document.appendChild(root);
 
     }
 
