@@ -27,6 +27,8 @@ private slots:
     void on_Save_to_json_Button_clicked();
 
 private:
+
+    QMenu *fileMenu;
     QJsonDocument jsondocument;
     QDomDocument document;
     Ui::MainWindow *ui;
