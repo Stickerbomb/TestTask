@@ -207,7 +207,9 @@ void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
 
     for(int i = 0; i< item->rowCount(); i++){
         if(item->child(i,0)->hasChildren()){
+            QDomText newNodeText = document.createTextNode(item->child(i,0)->child(1,0)->text());
             QDomElement domelem = document.createElement(item->child(i,0)->text());
+            domelem.appendChild(newNodeText);
             QStringList listArguments = item->child(i,0)->child(0,0)->text().split(' ');
             listArguments.removeLast();
             foreach(QString attr, listArguments){
@@ -216,7 +218,6 @@ void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
                 param.last().remove('\"');
                 domelem.setAttribute(param.first(),param.last());
             }
-            domelem.setNodeValue(item->child(i,0)->child(1,0)->text());
             dom_root.appendChild(domelem);
 
             //Debug section
