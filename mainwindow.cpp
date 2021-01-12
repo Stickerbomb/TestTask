@@ -47,9 +47,7 @@ void MainWindow::on_choose_file_button_clicked()
 void MainWindow::read(QString Filename)
 {
     if(model) delete model;
-    QStandardItem *root = new QStandardItem("Root");
     model = new QStandardItemModel(0,1,this);
-    model->appendRow(root);
     ui->treeView->setModel(model);
 
     //load the xml file
@@ -59,6 +57,8 @@ void MainWindow::read(QString Filename)
         document.setContent(&file);
         file.close();
     }
+    QStandardItem *root = new QStandardItem(document.firstChild().nodeName());
+    model->appendRow(root);
 
     //get the xml root element
     QDomNode xmlroot = document.documentElement();
