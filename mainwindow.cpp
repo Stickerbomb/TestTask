@@ -69,41 +69,35 @@ void MainWindow::read(QString Filename)
 
 void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
 {
-    QDomNode domNode = _elem.firstChild();
-    while(!domNode.isNull())
-    {
-        if(domNode.isElement())
-        {
-            QDomElement domElement = domNode.toElement();
-
-
-            const QDomNamedNodeMap attributeMap = domNode.attributes();
-            QStringList attributes;
-            for (int i = 0; i < attributeMap.count(); ++i) {
-                QDomNode attribute = attributeMap.item(i);
-                attributes << attribute.nodeName() + "=\""
-                              + attribute.nodeValue() + '"';
-            }
-
-            // QStringList to QList<QStandartItem*> for appending to columns
+      const auto domNodeList = _elem.childNodes();
+      for (int i = 0; i < domNodeList.length(); ++i) {
+        const auto domNode = domNodeList.at(i);
+        QDomElement domElement = domNode.toElement();
+        const QDomNamedNodeMap attributeMap = domNode.attributes();
+        QStringList attributes;
+        for (int i = 0; i < attributeMap.count(); ++i) {
+          QDomNode attribute = attributeMap.item(i);
+          attributes << attribute.nodeName() + "=\"" + attribute.nodeValue() + '"';
+        }
+        // QStringList to QList<QStandartItem*> for appending to columns
             QString atr;
-            for ( const auto& i : attributes  ){
-                atr += i + " ";
+            for (const auto &i : attributes) {
+              atr += i + " ";
             }
 
             QStandardItem *node = new QStandardItem(domElement.nodeName());
             QStandardItem *atr_item = new QStandardItem(atr);
-            QStandardItem *text_item = new QStandardItem(domElement.text());
             node->appendRow(atr_item);
-            node->appendRow(text_item);
-            _Model->appendRow(node);
-            if(domNode.hasChildNodes()){
-                traverseShow(domNode, node);
+            if (!domNode.hasChildNodes() || !domNode.firstChild().isElement()) {
+              node->appendRow(new QStandardItem(domElement.text()));
             }
+            _Model->appendRow(node);
+            if (domNode.hasChildNodes() && domNode.firstChild().isElement()) {
+              traverseShow(domNode, node);
+            }
+          }
         }
-        domNode = domNode.nextSibling();
-    }
-}
+
 
 QDomNode MainWindow::toDomNode(const QStandardItem &parent)
 {
