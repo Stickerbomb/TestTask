@@ -108,7 +108,7 @@ QDomNode MainWindow::toDomNode(const QStandardItem &parent)
 
 QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
 {
-    qDebug() << jarray << "  1  ";
+    qDebug() << jarray << "|>  ARRAY  <|";
     QStandardItem *result = new QStandardItem(parent);
     QString str;
     QStandardItem *item;
@@ -128,6 +128,17 @@ QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
         if(value.isObject()){
             QStandardItem *temp = toStdItem(value.toObject(),parent);
             result->appendRow(temp);
+//            if(temp->hasChildren()){
+//                for(int i = 0; i<temp->rowCount(); i++){
+//                    QStandardItem *qwe = new QStandardItem(temp->child(i,0)->text());
+//                    result->appendRow(toStdItem(value[0].toObject(),qwe->text()));
+//                    qDebug() << "HAAAAAAAAAAAAAAAAAAAS" << qwe->text();
+//                }
+//            }
+        }
+        if(value.isArray()){
+            QStandardItem *temp = toStdItem(value.toArray(),parent);
+            result->appendRow(temp);
         }
     }
     if(str!=""){
@@ -141,6 +152,7 @@ QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
 
 QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
 {
+    qDebug() << jo << "|  OBJECT  |";
     QStandardItem *item;
     QStandardItem *result = new QStandardItem(parent);
     foreach(const QString & str, jo.keys()){
@@ -152,14 +164,14 @@ QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
 
         if(jo.value(str).isDouble()){
             str_value = QString::fromStdString(std::to_string(jo.value(str).toDouble()));
-            qDebug() << str_value << " 2 ";
+//            qDebug() << str_value << " 2 ";
             item_value = new QStandardItem(str_value);
             item->appendRow(item_value);
         }
         else{
             if(jo.value(str).isString()){
                 str_value = jo.value(str).toString();
-                qDebug() << str_value << " 2 ";
+//                qDebug() << str_value << " 2 ";
                 item_value = new QStandardItem(str_value);
                 item->appendRow(item_value);
             }
@@ -167,7 +179,7 @@ QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
 
                 if(jo.value(str).isBool()){
                      str_value = jo.value(str).toBool() ? "true" : "false";
-                     qDebug() << str_value << " 2 ";
+//                     qDebug() << str_value << " 2 ";
                      item_value = new QStandardItem(str_value);
                      item->appendRow(item_value);
                 }
@@ -176,13 +188,11 @@ QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
                     if(jo.value(str).isArray()){
                         item = toStdItem(jo.value(str).toArray(), str);
                         item_value = new QStandardItem();
-                        qDebug() << str << "ARRAY 2 ";
                     }
 
                     if(jo.value(str).isObject()){
                         item = toStdItem(jo.value(str).toObject(), str);
                         item_value = new QStandardItem();
-                        qDebug() << str << "OBJECT 2 ";
                     }
                 }
             }
@@ -201,7 +211,9 @@ void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
 
     for(int i = 0; i< item->rowCount(); i++){
         if(item->child(i,0)->hasChildren()){
-            QDomText newNodeText = document.createTextNode(item->child(i,0)->child(1,0)->text());
+            QDomText newNodeText;
+            if(!item->child(i,0)->child(1,0)->hasChildren())
+                    newNodeText = document.createTextNode(item->child(i,0)->child(1,0)->text());
             QDomElement domelem = document.createElement(item->child(i,0)->text());
             domelem.appendChild(newNodeText);
             QStringList listArguments = item->child(i,0)->child(0,0)->text().split(' ');
