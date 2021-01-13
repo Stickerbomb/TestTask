@@ -108,7 +108,7 @@ QDomNode MainWindow::toDomNode(const QStandardItem &parent)
 
 QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
 {
-    qDebug() << jarray << "|>  ARRAY  <|";
+//    qDebug() << jarray << "|>  ARRAY  <|";
     QStandardItem *result = new QStandardItem(parent);
     QString str;
     QStandardItem *item;
@@ -126,7 +126,7 @@ QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
                 str += tem_str + ", ";
         }
         if(value.isObject()){
-            QStandardItem *temp = toStdItem(value.toObject(),parent);
+            QStandardItem *temp = toStdItem(value.toObject(), "Object");
             result->appendRow(temp);
 //            if(temp->hasChildren()){
 //                for(int i = 0; i<temp->rowCount(); i++){
@@ -137,7 +137,7 @@ QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
 //            }
         }
         if(value.isArray()){
-            QStandardItem *temp = toStdItem(value.toArray(),parent);
+            QStandardItem *temp = toStdItem(value.toArray(), "Array");
             result->appendRow(temp);
         }
     }
@@ -152,7 +152,7 @@ QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
 
 QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
 {
-    qDebug() << jo << "|  OBJECT  |";
+//    qDebug() << jo << "|  OBJECT  |";
     QStandardItem *item;
     QStandardItem *result = new QStandardItem(parent);
     foreach(const QString & str, jo.keys()){
@@ -212,8 +212,9 @@ void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
     for(int i = 0; i< item->rowCount(); i++){
         if(item->child(i,0)->hasChildren()){
             QDomText newNodeText;
-            if(!item->child(i,0)->child(1,0)->hasChildren())
+            if(!item->child(i,0)->child(1,0)->hasChildren()){
                     newNodeText = document.createTextNode(item->child(i,0)->child(1,0)->text());
+            }
             QDomElement domelem = document.createElement(item->child(i,0)->text());
             domelem.appendChild(newNodeText);
             QStringList listArguments = item->child(i,0)->child(0,0)->text().split(' ');
@@ -226,16 +227,16 @@ void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
             }
             dom_root.appendChild(domelem);
 
-            //Debug section
-            const QDomNamedNodeMap attributeMap = domelem.attributes();
-            QStringList attributes;
-            for (int j = 0; j < attributeMap.count(); ++j) {
-                QDomNode attribute = attributeMap.item(j);
-                attributes << attribute.nodeName() + "= "
-                              + attribute.nodeValue() + ' ';
-            }
-            // end Debug section
-            qDebug() <<attributes << "  ATRIBUTES  ";
+//            //Debug section
+//            const QDomNamedNodeMap attributeMap = domelem.attributes();
+//            QStringList attributes;
+//            for (int j = 0; j < attributeMap.count(); ++j) {
+//                QDomNode attribute = attributeMap.item(j);
+//                attributes << attribute.nodeName() + "= "
+//                              + attribute.nodeValue() + ' ';
+//            }
+//            // end Debug section
+//            qDebug() <<attributes << "  ATRIBUTES  ";
 
             write(item->child(i,0),domelem);
         }
