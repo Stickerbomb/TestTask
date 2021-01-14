@@ -110,43 +110,34 @@ QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
 {
 //    qDebug() << jarray << "|>  ARRAY  <|";
     QStandardItem *result = new QStandardItem(parent);
-    QString str;
     QStandardItem *item;
 
     foreach(const QJsonValue &value, jarray){
+
+
         if(value.isDouble()) {
-            str += QString::number(value.toInt()) +", ";
+            QString str = QString::fromStdString(std::to_string(value.toDouble()));
+            item = new QStandardItem(str);
         }
 
         if(value.isString()) {
-                str += "\"" + value.toString() +"\", ";
+            QString str = value.toString();
+            item = new QStandardItem(str);
         }
         if(value.isBool()) {
-                QString tem_str = value.toBool() ? "true" : "false" ;
-                str += tem_str + ", ";
+            QString str = value.toBool() ? "true" : "false" ;
+            item = new QStandardItem(str);
         }
         if(value.isObject()){
-            QStandardItem *temp = toStdItem(value.toObject(), "Object");
-            result->appendRow(temp);
-//            if(temp->hasChildren()){
-//                for(int i = 0; i<temp->rowCount(); i++){
-//                    QStandardItem *qwe = new QStandardItem(temp->child(i,0)->text());
-//                    result->appendRow(toStdItem(value[0].toObject(),qwe->text()));
-//                    qDebug() << "HAAAAAAAAAAAAAAAAAAAS" << qwe->text();
-//                }
-//            }
+            item = toStdItem(value.toObject(), "[" + parent + "]");
+
         }
         if(value.isArray()){
-            QStandardItem *temp = toStdItem(value.toArray(), "Array");
-            result->appendRow(temp);
+            item = toStdItem(value.toArray(), "Array");
         }
-    }
-    if(str!=""){
-        str = str.remove(str.length()-2,2);
-    }
-    item = new QStandardItem(str);
-    result->appendRow(item);
+        result->appendRow(item);
 
+    }
     return result;
 }
 
@@ -206,7 +197,7 @@ QStandardItem *MainWindow::toStdItem(const QJsonObject &jo, QString parent)
     return result;
 }
 
-void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
+void MainWindow::writeXML(QStandardItem *item, QDomNode &dom_root)
 {
 
     for(int i = 0; i< item->rowCount(); i++){
@@ -238,10 +229,44 @@ void MainWindow::write(QStandardItem *item, QDomNode &dom_root)
 //            // end Debug section
 //            qDebug() <<attributes << "  ATRIBUTES  ";
 
-            write(item->child(i,0),domelem);
+            writeXML(item->child(i,0),domelem);
         }
     }
 
+
+}
+
+void MainWindow::writeJson(QStandardItem *item, QJsonObject &json_root)
+{
+    for(int i = 0; i< item->rowCount(); i++){
+        QStandardItem *currentItem = item->child(i,0);
+
+        if(currentItem->hasChildren() && !currentItem->child(0,0)->hasChildren() && currentItem->rowCount()==1){ // simple node
+            json_root.insert(currentItem->text(),currentItem->child(0,0)->text());
+        }
+        if(currentItem->child(0,0)->text().at(0)=="["){
+            QJsonArray  *jArray = new QJsonArray();
+            writeJson(currentItem,*jArray);
+        }
+    }
+
+}
+
+
+void MainWindow::writeJson(QStandardItem *item, QJsonArray &json_root)
+{
+    for(int i = 0; i< item->rowCount(); i++){
+        QStandardItem *currentItem = item->child(i,0);
+
+        if(currentItem->hasChildren() && !currentItem->child(0,0)->hasChildren() && currentItem->rowCount()==1){ // simple node
+            QJsonValue *value = new QJsonValue(currentItem->child(0,0)->text());
+            json_root.append(*value);
+        }
+        if(currentItem->child(0,0)->text().at(0)=="["){
+            QJsonArray  *jArray = new QJsonArray();
+            writeJson(item->child(i,0),*jArray);
+        }
+    }
 
 }
 
@@ -254,7 +279,7 @@ void MainWindow::on_choose_file_button_2_clicked()
     document.clear();
     if(model){
         QDomNode root = document.createElement((model->item(0,0)->text()));
-        write(model->item(0,0),root);
+        writeXML(model->item(0,0),root);
         document.appendChild(root);
 
     }
@@ -305,14 +330,14 @@ void MainWindow::on_Load_from_json_Button_clicked()
 void MainWindow::on_Save_to_json_Button_clicked()
 {
     QJsonDocument JsonDocument = QJsonDocument();
-    QJsonObject RootObject = JsonDocument.object();
-    JsonDocument.setObject(RootObject); // set to json document
+    QJsonObject rootObject = JsonDocument.object();
+    writeJson(model->item(0,0),rootObject);
+    JsonDocument.setObject(rootObject); // set to json document
 
     QString file_name;
     QString filename = QFileDialog::getSaveFileName(this,
-                                              tr("Open Xml"), ".",
-                                              tr("Xml files (*.xml)"));
-
+                                                tr("Open JSON"), ".",
+                                                tr("Json files (*.json)"));
     QFile file(filename);
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
