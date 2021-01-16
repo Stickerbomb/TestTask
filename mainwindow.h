@@ -37,8 +37,10 @@ private:
     void writeXML(QStandardItem *item, QDomNode &dom_root);
     void writeJson(QStandardItem *item, QJsonObject &json_root);
     void writeJson(QStandardItem *item, QJsonArray &json_root);
+    QJsonValue* stringToJson(QString str);
+    void jsonToDom(QJsonObject jsondoc, QDomNode &parent);
+    void jsonToDom(QJsonArray jsondoc, QDomNode &parent);
     void traverseShow(const QDomNode &_elem, QStandardItem *subModel);
-    QDomNode toDomNode(const QStandardItem &parent);
     QStandardItem* toStdItem(const QJsonArray &jarray, QString parent);
     QStandardItem* toStdItem(const QJsonObject &jo, QString parent);
 };
