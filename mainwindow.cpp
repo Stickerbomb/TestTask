@@ -317,13 +317,13 @@ QDomNode MainWindow::jsonToDom(QJsonObject jsondoc)
                 else{
                     if(jsondoc.value(str).isArray()){
                         result = document.createElement(str);
-                        QDomNode temp = jsonToDom(jsondoc.value(str).toObject());
+                        QDomNode temp = jsonToDom(jsondoc.value(str).toArray());
                         result.appendChild(temp);
                         qDebug() << str << "ARR" <<result.firstChild().nodeName();
                     }
                     if(jsondoc.value(str).isObject()){
                         result = document.createElement(str);
-                        QDomNode temp = jsonToDom(jsondoc.value(str).toArray());
+                        QDomNode temp = jsonToDom(jsondoc.value(str).toObject());
                         result.appendChild(temp);
                         qDebug() << str << "OBJ" <<result.firstChild().nodeName();
                     }
@@ -370,12 +370,12 @@ QDomNode MainWindow::jsonToDom(QJsonArray jsonarr)
                 else{
                     if(value.isArray()){
                         result = document.createElement("Array");
-                        QDomNode temp = jsonToDom(value.toObject());
+                        QDomNode temp = jsonToDom(value.toArray());
                         result.appendChild(temp);
                     }
                     if(value.isObject()){
                         result = document.createElement("Object");
-                        QDomNode temp = jsonToDom(value.toArray());
+                        QDomNode temp = jsonToDom(value.toObject());
                         result.appendChild(temp);
                     }
                     }
