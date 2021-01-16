@@ -352,25 +352,24 @@ void MainWindow::jsonToDom(QJsonArray jsonarr, QDomNode &parent)
         qDebug() << value << "AR_VALUE";
         if(value.isDouble()){
             str_value = QString::fromStdString(std::to_string(value.toDouble()));
-            node.setAttribute("",str_value);
+            node.setAttribute("", node.attribute("") + str_value + ", ");
+            qDebug() << node.attribute("") << "AAAAAAAAAAAAA";
         }
         else{
             if(value.isString()){
                 str_value = value.toString();
-                node.setAttribute("",str_value);
+                node.setAttribute("", node.attribute("") + str_value);
             }
             else{
                 if(value.isBool()){
                     str_value = value.toBool() ? "true" : "false";
-                    node.setAttribute("",str_value);
+                    node.setAttribute("", node.attribute("") + str_value);
                 }
                 else{
                     if(value.isArray()){
-                        node = document.createElement(parent.nodeName());
                         jsonToDom(value.toArray(),node);
                     }
                     if(value.isObject()){
-                        node = document.createElement(parent.nodeName());
                         jsonToDom(value.toObject(),node);
                     }
                     }
@@ -431,7 +430,7 @@ void MainWindow::on_Load_from_json_Button_clicked()
 
     QStandardItem *root = new QStandardItem("Root");//toStdItem(sett2,"Root");
     document.clear();
-    QDomNode fromJsonRoot = document.documentElement();
+    QDomNode fromJsonRoot = document.createElement("Root");
     jsonToDom(jsonObject, fromJsonRoot);
 
     document.appendChild(fromJsonRoot);
