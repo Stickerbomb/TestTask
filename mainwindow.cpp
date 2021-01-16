@@ -108,7 +108,6 @@ QStandardItem* MainWindow::toStdItem(const QJsonArray &jarray, QString parent)
 
     foreach(const QJsonValue &value, jarray){
 
-
         if(value.isDouble()) {
             QString str = QString::fromStdString(std::to_string(value.toDouble()));
             item = new QStandardItem(str);
@@ -229,7 +228,7 @@ void MainWindow::writeXML(QStandardItem *item, QDomNode &dom_root)
 
 
 }
-/*
+
 void MainWindow::writeJson(QStandardItem *item, QJsonObject &json_root)
 {
     for(int i = 0; i< item->rowCount(); i++){
@@ -291,7 +290,7 @@ QJsonValue* MainWindow::stringToJson(QString str)
     bool ok;
     // Double dec = str.toDouble(&ok, 10);
 }
-*/
+
 QDomNode MainWindow::jsonToDom(QJsonObject jsondoc)
 {
     QDomElement result;
@@ -301,19 +300,19 @@ QDomNode MainWindow::jsonToDom(QJsonObject jsondoc)
         if(jsondoc.value(str).isDouble()){
             str_value = QString::fromStdString(std::to_string(jsondoc.value(str).toDouble()));
             result.setAttribute(str,str_value);
-            qDebug() << str << str_value << "Attr seted" << result.attributeNode(str).value();
+//            qDebug() << str << str_value << "Attr seted" << result.attributeNode(str).value();
         }
         else{
             if(jsondoc.value(str).isString()){
                 str_value = jsondoc.value(str).toString();
                 result.setAttribute(str,str_value);
-                qDebug() << str << str_value << "Attr seted" << result.attributeNode(str).value();
+//                qDebug() << str << str_value << "Attr seted" << result.attributeNode(str).value();
             }
             else{
                 if(jsondoc.value(str).isBool()){
                     str_value = jsondoc.value(str).toBool() ? "true" : "false";
                     result.setAttribute(str,str_value);
-                    qDebug() << str << str_value << "Attr seted" << result.attributeNode(str).value();
+//                    qDebug() << str << str_value << "Attr seted" << result.attributeNode(str).value();
                 }
                 else{
                     if(jsondoc.value(str).isArray()){
@@ -347,11 +346,13 @@ QDomNode MainWindow::jsonToDom(QJsonObject jsondoc)
                 return result;
 }
 
-QDomNode MainWindow::jsonToDom(QJsonArray jsondoc)
+QDomNode MainWindow::jsonToDom(QJsonArray jsonarr)
 {
     QDomElement result;
     QString str_value;
-    foreach(const QJsonValue &value, jsondoc){
+    qDebug() << "ARRAY DETECTED" << jsonarr;
+    foreach(const QJsonValue &value, jsonarr){
+        qDebug() << value << "AR_VALUE";
         if(value.isDouble()){
             str_value = QString::fromStdString(std::to_string(value.toDouble()));
             result.setAttribute("",str_value);
