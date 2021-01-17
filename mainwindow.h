@@ -43,5 +43,7 @@ private:
     void traverseShow(const QDomNode &_elem, QStandardItem *subModel);
     QStandardItem* toStdItem(const QJsonArray &jarray, QString parent);
     QStandardItem* toStdItem(const QJsonObject &jo, QString parent);
+    void jsonToDom(const QString &key, const QJsonValue &value, QDomElement &parent);
+    QDomNode jsonToDom(QJsonObject jsondoc);
 };
 #endif // MAINWINDOW_H
