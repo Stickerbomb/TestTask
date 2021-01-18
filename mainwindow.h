@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "xmlparser.h"
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QtXml>
@@ -32,17 +33,11 @@ private:
     QMenu *fileMenu;
     QJsonDocument jsondocument;
     QDomDocument document;
+    XmlParser *xmlParser;
     Ui::MainWindow *ui;
     QStandardItemModel *model;
-    void read(QString _noed);
+    void read(QString Filename);
     void writeXML(QStandardItem *item, QDomNode &dom_root);
-    void writeJson(QStandardItem *item, QJsonObject &json_root);
-    void writeJson(QStandardItem *item, QJsonArray &json_root);
-    QJsonValue* stringToJson(QString str);
     void traverseShow(const QDomNode &_elem, QStandardItem *subModel);
-    QStandardItem* toStdItem(const QJsonArray &jarray, QString parent);
-    QStandardItem* toStdItem(const QJsonObject &jo, QString parent);
-    QDomElement jsonToDom(const QString &key, const QJsonValue &value);
-    QDomElement jsonToDom(QJsonObject jsondoc, const QString name);
 };
 #endif // MAINWINDOW_H
