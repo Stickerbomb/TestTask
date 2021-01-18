@@ -74,28 +74,33 @@ void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
         const auto domNode = domNodeList.at(i);
         QDomElement domElement = domNode.toElement();
         const QDomNamedNodeMap attributeMap = domNode.attributes();
+
         QStringList attributes;
         for (int i = 0; i < attributeMap.count(); ++i) {
           QDomNode attribute = attributeMap.item(i);
           attributes << attribute.nodeName() + "=\"" + attribute.nodeValue() + '"';
         }
         // QStringList to QList<QStandartItem*> for appending to columns
-            QString atr;
-            for (const auto &i : attributes) {
-              atr += i + " ";
-            }
+        QString atr;
+        for (const auto &i : attributes) {
+            atr += i + " ";
+        }
 
-            QStandardItem *node = new QStandardItem(domElement.nodeName());
+        QStandardItem *node = new QStandardItem(domElement.nodeName());
+        if(domNode.hasAttributes()){
             QStandardItem *atr_item = new QStandardItem(atr);
+
             node->appendRow(atr_item);
-            if (!domNode.hasChildNodes() || !domNode.firstChild().isElement()) {
-              node->appendRow(new QStandardItem(domElement.text()));
-            }
-            _Model->appendRow(node);
-            if (domNode.hasChildNodes() && domNode.firstChild().isElement()) {
-              traverseShow(domNode, node);
-            }
+        }
+        if ((!domNode.hasChildNodes() || !domNode.firstChild().isElement()) && domElement.text() != "") {
+            node->appendRow(new QStandardItem(domElement.text()));
+        }
+        _Model->appendRow(node);
+        if (domNode.hasChildNodes() && domNode.firstChild().isElement()) {
+            traverseShow(domNode, node);
+
           }
+      }
         }
 
 
