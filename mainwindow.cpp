@@ -291,140 +291,57 @@ QJsonValue* MainWindow::stringToJson(QString str)
     // Double dec = str.toDouble(&ok, 10);
 }
 
-QDomNode MainWindow::jsonToDom(QJsonObject jsondoc) {
-    QDomElement result;
+QDomElement MainWindow::jsonToDom(QJsonObject jsondoc, const QString name) {
+    QDomElement result = document.createElement(name);
     for (const auto &key : jsondoc.keys()) {
-        jsonToDom(key, jsondoc.value(key), result);
+        result.appendChild(jsonToDom(key, jsondoc.value(key)));
     }
     qDebug() << result.nodeName() << "added OBJECT";
     return result;
 }
 
-void MainWindow::jsonToDom(const QString &key, const QJsonValue &value, QDomElement &parent) {
+QDomElement MainWindow::jsonToDom(const QString &key, const QJsonValue &value) {
     QDomElement node = document.createElement(key);
-    if(parent.isNull()) {
-        parent = document.createElement(key);
-        qDebug() <<parent.tagName() << node.tagName() << "            NULL  ";
-    }
+    int i=0;
     switch (value.type()) {
         case QJsonValue::Type::Bool:
             qDebug() << key << ": [bool] " << value.toBool();
-            parent.setAttribute(key, parent.attribute(key) + QString::fromStdString(std::to_string(value.toDouble())));
+            node.appendChild(document.createElement( QString::fromStdString( std::to_string( value.toBool()))));
             break;
 
         case QJsonValue::Type::Double:
             qDebug() << key << ": [double] " << value.toDouble();
-            parent.setAttribute(key, parent.attribute(key) + value.toDouble());
+            node.appendChild( document.createElement( QString::fromStdString( std::to_string(value.toDouble()))));
             break;
 
         case QJsonValue::Type::String:
             qDebug() << key << ": [string] " << value.toString();
-            parent.setAttribute(key, parent.attribute(key) + value.toString());
+            node.appendChild( document.createElement( value.toString()));
             break;
 
         case QJsonValue::Type::Null:
             qDebug() << key << ": [null] ";
-            parent.setAttribute(key, parent.attribute(key) + "[null]");
+            node.appendChild( document.createElement( "[null]"));
             break;
 
         case QJsonValue::Type::Array:
             qDebug() << key << ": [array] ";
             for (const auto &o : value.toArray()) {
-                jsonToDom(key, o, node);
+                node.appendChild(jsonToDom(key + QString::fromStdString( std::to_string(i)), o));
+                i++;
             }
-            parent.appendChild(node);
             break;
 
         case QJsonValue::Type::Object:
             qDebug() << key << ": [object] ";
-            node.appendChild(jsonToDom(value.toObject()));
-            parent.appendChild(node);
+
+            node = jsonToDom(value.toObject(),key);
             break;
-  }
-}
-
-void MainWindow::jsonToDom(QJsonObject jsondoc, QDomNode &parent)
-{
-    QDomElement node = document.createElement(parent.nodeName());
-    foreach(const QString & str, jsondoc.keys()){
-        QString str_value;
-        if(jsondoc.value(str).isDouble()){
-            str_value = QString::fromStdString(std::to_string(jsondoc.value(str).toDouble()));
-            node.setAttribute(str,str_value);
-        }
-        else{
-            if(jsondoc.value(str).isString()){
-                str_value = jsondoc.value(str).toString();
-                node.setAttribute(str,str_value);
-            }
-            else{
-                if(jsondoc.value(str).isBool()){
-                    str_value = jsondoc.value(str).toBool() ? "true" : "false";
-                    node.setAttribute(str,str_value);
-                }
-                else{
-                    if(jsondoc.value(str).isArray()){
-                        node = document.createElement(str);
-                        jsonToDom(jsondoc.value(str).toArray(),node);
-                        qDebug() << str << "ARR" <<node.firstChild().nodeName();
-                    }
-                    if(jsondoc.value(str).isObject()){
-                        node = document.createElement(str);
-                        jsonToDom(jsondoc.value(str).toObject(),node);
-                        qDebug() << str << "OBJ" <<node.firstChild().nodeName();
-                    }
-                    }
-                }
-            }
-
-
-        }//foreach
-        //Debug section
-        const QDomNamedNodeMap attributeMap = node.attributes();
-        QStringList attributes;
-        for (int j = 0; j < attributeMap.count(); ++j) {
-            QDomNode attribute = attributeMap.item(j);
-             attributes << attribute.nodeName() + "= "
-                          + attribute.nodeValue() + ' ';
-        }
-        // end Debug section
-        parent.appendChild(node);
-}
-
-void MainWindow::jsonToDom(QJsonArray jsonarr, QDomNode &parent)
-{
-    QDomElement node = document.createElement(parent.nodeName());
-    QString str_value;
-    qDebug() << "QJsonArray" << jsonarr;
-    foreach(const QJsonValue &value, jsonarr){
-        qDebug() << value << "AR_VALUE";
-        if(value.isDouble()){
-            str_value = QString::fromStdString(std::to_string(value.toDouble()));
-            node.setAttribute("", node.attribute("") + str_value + ", ");
-        }
-        else{
-            if(value.isString()){
-                str_value = value.toString();
-                node.setAttribute("", node.attribute("") + str_value);
-            }
-            else{
-                if(value.isBool()){
-                    str_value = value.toBool() ? "true" : "false";
-                    node.setAttribute("", node.attribute("") + str_value);
-                }
-                else{
-                    if(value.isArray()){
-                        jsonToDom(value.toArray(),node);
-                    }
-                    if(value.isObject()){
-                        jsonToDom(value.toObject(),node);
-                    }
-                    }
-                }
-            }
-
     }
-    parent.appendChild(node);
+    if(node.isNull()){
+        qDebug() << " NULL ";
+    }
+    return node;
 }
 
 void MainWindow::on_choose_file_button_2_clicked()
@@ -478,7 +395,7 @@ void MainWindow::on_Load_from_json_Button_clicked()
     document.clear();
     QStandardItem *root = new QStandardItem("Root");//toStdItem(sett2,"Root");
     QDomElement fromJsonRoot;
-    jsonToDom("Root", jsonObject, fromJsonRoot);
+    fromJsonRoot = jsonToDom("Root", jsonObject);
 
     document.appendChild(fromJsonRoot);
     qDebug() << document.toString() << "DOM";
@@ -510,3 +427,5 @@ void MainWindow::on_Save_to_json_Button_clicked()
     file.write(JsonDocument.toJson());
     file.close();
 }
+
+
