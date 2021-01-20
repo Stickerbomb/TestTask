@@ -32,10 +32,8 @@ MainWindow::~MainWindow()
 void MainWindow::on_choose_file_button_clicked()
 {
        /* Вызываем диалог выбора файла для чтения */
-    QString filename = QFileDialog::getOpenFileName(this,
-                                              tr("Open Xml"), ".",
-                                              tr("Xml files (*.xml)"));
-
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open"), ".",
+                                                      TypeFile::filtersList());
     if(filename != ""){
                read(filename);
     }
@@ -51,27 +49,25 @@ void MainWindow::read(QString Filename)
     model = new QStandardItemModel(0,1,this);
     ui->treeView->setModel(model);
 
+    QDomNode xmlroot ;
     //load the xml file
     QFile file(Filename);
+    QStandardItem *root = new QStandardItem(document.firstChild().nodeName());
     if(file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        document.setContent(&file);
-        file.close();
+        TypeFile *tpFile = new TypeFile(TypeFile::fromString(Filename));
+         root =xmlParser->read(file.readAll(),*tpFile);
     }
-    QStandardItem *root = new QStandardItem(document.firstChild().nodeName());
+    file.close();
     model->appendRow(root);
-
-    //get the xml root element
-    QDomNode xmlroot = document.documentElement();
-    traverseShow(xmlroot,root);
 
 
 }
 
 void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
 {
-      const auto domNodeList = _elem.childNodes();
-      for (int i = 0; i < domNodeList.length(); ++i) {
+    const auto domNodeList = _elem.childNodes();
+    for (int i = 0; i < domNodeList.length(); ++i) {
         const auto domNode = domNodeList.at(i);
         QDomElement domElement = domNode.toElement();
         const QDomNamedNodeMap attributeMap = domNode.attributes();
@@ -86,11 +82,9 @@ void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
         for (const auto &i : attributes) {
             atr += i + " ";
         }
-
         QStandardItem *node = new QStandardItem(domElement.nodeName());
         if(domNode.hasAttributes()){
             QStandardItem *atr_item = new QStandardItem(atr);
-
             node->appendRow(atr_item);
         }
         if ((!domNode.hasChildNodes() || !domNode.firstChild().isElement()) && domElement.text() != "") {
@@ -99,10 +93,9 @@ void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
         _Model->appendRow(node);
         if (domNode.hasChildNodes() && domNode.firstChild().isElement()) {
             traverseShow(domNode, node);
-
-          }
-      }
         }
+    }
+}
 
 
 
@@ -178,32 +171,16 @@ void MainWindow::on_choose_file_button_2_clicked()
 void MainWindow::on_Load_from_json_Button_clicked()
 {
     if(model) delete model;
-    model = new QStandardItemModel(0,3,this);
+    model = new QStandardItemModel(0,1,this);
     ui->treeView->setModel(model);
 
+    QStandardItem *root = new QStandardItem("Root");//toStdItem(sett2,"Root");
     QString filename = QFileDialog::getOpenFileName(this,
                                               tr("Open JSON"), ".",
                                               tr("Json files (*.json)"));
-    QString val;
-    QFile file(filename);
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-    val = file.readAll();
-    file.close();
-
-    jsondocument = QJsonDocument::fromJson(val.toUtf8());
-    QJsonObject jsonObject = jsondocument.object();
-
-
-    document.clear();
-    QStandardItem *root = new QStandardItem("Root");//toStdItem(sett2,"Root");
-    QDomElement fromJsonRoot;
-    fromJsonRoot = xmlParser->jsonToDom("Root", jsonObject);
-
-    document.appendChild(fromJsonRoot);
-    qDebug() << document.toString() << "DOM";
-//    fromJsonRoot = document.documentElement();
-    traverseShow(fromJsonRoot,root);
-    model->appendRow(root);
+    if(filename != ""){
+               read(filename);
+    }
 
 
 }
@@ -213,7 +190,7 @@ void MainWindow::on_Save_to_json_Button_clicked()
 {
     QJsonDocument JsonDocument = QJsonDocument();
     QJsonObject rootObject = JsonDocument.object();
-    xmlParser->writeJson(model->item(0,0),rootObject);
+
     JsonDocument.setObject(rootObject); // set to json document
 
     QString file_name;
@@ -231,3 +208,12 @@ void MainWindow::on_Save_to_json_Button_clicked()
 }
 
 
+
+void MainWindow::on_addButton_clicked()
+{
+    QModelIndexList indexes = ui->treeView->selectionModel()->selectedIndexes();
+    if(!indexes.isEmpty()){
+        qDebug() << ui->treeView->currentIndex().model();
+       // model->item(currentIndex.row(), currentIndex.column())->appendRow(new QStandardItem(""));
+    }
+}

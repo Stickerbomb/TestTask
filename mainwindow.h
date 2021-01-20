@@ -28,6 +28,8 @@ private slots:
     void on_Save_to_json_Button_clicked();
 
 
+    void on_addButton_clicked();
+
 private:
 
     QMenu *fileMenu;

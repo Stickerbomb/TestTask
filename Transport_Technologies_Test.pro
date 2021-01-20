@@ -17,13 +17,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    typefile.cpp \
+    xmlparser.cpp
 
 HEADERS += \
-    classes.h \
     mainwindow.h \
-    qserializer.h
-    qserializer.h
+    typefile.h \
+    xmlparser.h
 
 FORMS += \
     mainwindow.ui

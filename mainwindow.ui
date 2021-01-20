@@ -16,6 +16,13 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <widget class="QPushButton" name="addButton">
+      <property name="text">
+       <string>Add Node</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTreeView" name="treeView">
       <property name="editTriggers">
        <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
