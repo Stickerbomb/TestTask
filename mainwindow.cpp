@@ -57,55 +57,13 @@ void MainWindow::on_open_file_clicked()
 }
 
 
-
-
-void MainWindow::writeXML(QStandardItem *item, QDomNode &dom_root)
-{
-
-    for(int i = 0; i< item->rowCount(); i++){
-        if(item->child(i,0)->hasChildren()){
-            QDomText newNodeText;
-            if(!item->child(i,0)->child(1,0)->hasChildren()){
-                    newNodeText = document.createTextNode(item->child(i,0)->child(1,0)->text());
-            }
-            QDomElement domelem = document.createElement(item->child(i,0)->text());
-            domelem.appendChild(newNodeText);
-            QStringList listArguments = item->child(i,0)->child(0,0)->text().split(' ');
-            listArguments.removeLast();
-            foreach(QString attr, listArguments){
-                QStringList param = attr.split('=');
-                param.first().remove('\"');
-                param.last().remove('\"');
-                domelem.setAttribute(param.first(),param.last());
-            }
-            dom_root.appendChild(domelem);
-
-//            //Debug section
-//            const QDomNamedNodeMap attributeMap = domelem.attributes();
-//            QStringList attributes;
-//            for (int j = 0; j < attributeMap.count(); ++j) {
-//                QDomNode attribute = attributeMap.item(j);
-//                attributes << attribute.nodeName() + "= "
-//                              + attribute.nodeValue() + ' ';
-//            }
-//            // end Debug section
-//            qDebug() <<attributes << "  ATRIBUTES  ";
-
-            writeXML(item->child(i,0),domelem);
-        }
-    }
-
-
-}
-
-
 void MainWindow::on_choose_file_button_2_clicked()
 {
 
     document.clear();
     if(model){
         QDomNode root = document.createElement((model->item(0,0)->text()));
-        writeXML(model->item(0,0),root);
+        xmlParser->writeXML(model->item(0,0),root);
         document.appendChild(root);
 
     }

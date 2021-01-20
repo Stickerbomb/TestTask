@@ -37,6 +37,5 @@ private:
     XmlParser *xmlParser;
     Ui::MainWindow *ui;
     QStandardItemModel *model;
-    void writeXML(QStandardItem *item, QDomNode &dom_root);
 };
 #endif // MAINWINDOW_H

@@ -12,9 +12,10 @@ public:
 
 
     QStandardItem* read(const QByteArray byteArray,  TypeFile& type);
-    void writeToFile(QString filename, QString type);
-
+    void writeToFile(QString filename, TypeFile& type);
+    void writeXML(QStandardItem *item, QDomNode &dom_root);
 private:
+
     void xmlToTree(const QDomNode &_elem, QStandardItem *_Model);
     void writeJson(QStandardItem *item, QJsonObject &json_root);
     void writeJson(QStandardItem *item, QJsonArray &json_root);

@@ -45,7 +45,7 @@ QStandardItem* XmlParser::read(const QByteArray byteArray,  TypeFile& type)
     return treeStdItem;
 }
 
-void XmlParser::writeToFile(QString filename, QString type)
+void XmlParser::writeToFile(QString filename, TypeFile& type)
 {
     QJsonDocument JsonDocument = QJsonDocument();
     QJsonObject rootObject = JsonDocument.object();
@@ -94,6 +94,45 @@ void XmlParser::xmlToTree(const QDomNode &_elem, QStandardItem *_Model)
             xmlToTree(domNode, node);
         }
     }
+}
+
+void XmlParser::writeXML(QStandardItem *item, QDomNode &dom_root)
+{
+
+    for(int i = 0; i< item->rowCount(); i++){
+        if(item->child(i,0)->hasChildren()){
+            QDomText newNodeText;
+            if(!item->child(i,0)->child(1,0)->hasChildren()){
+                    newNodeText = document.createTextNode(item->child(i,0)->child(1,0)->text());
+            }
+            QDomElement domelem = document.createElement(item->child(i,0)->text());
+            domelem.appendChild(newNodeText);
+            QStringList listArguments = item->child(i,0)->child(0,0)->text().split(' ');
+            listArguments.removeLast();
+            foreach(QString attr, listArguments){
+                QStringList param = attr.split('=');
+                param.first().remove('\"');
+                param.last().remove('\"');
+                domelem.setAttribute(param.first(),param.last());
+            }
+            dom_root.appendChild(domelem);
+/*
+            //Debug section
+            const QDomNamedNodeMap attributeMap = domelem.attributes();
+            QStringList attributes;
+            for (int j = 0; j < attributeMap.count(); ++j) {
+                QDomNode attribute = attributeMap.item(j);
+                attributes << attribute.nodeName() + "= "
+                              + attribute.nodeValue() + ' ';
+            }
+            // end Debug section
+            qDebug() <<attributes << "  ATRIBUTES  ";
+*/
+            writeXML(item->child(i,0),domelem);
+        }
+    }
+
+
 }
 
 void XmlParser::writeJson(QStandardItem *item, QJsonObject &json_root)
