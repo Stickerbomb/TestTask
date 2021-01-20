@@ -20,7 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(tr("&Open"), this, &MainWindow::on_open_file_clicked, QKeySequence::Open);
     fileMenu->addAction(tr("&Save to XML"), this, &MainWindow::on_choose_file_button_2_clicked, QKeySequence::Save);
-    fileMenu->addAction(tr("&Open Json..."), this, &MainWindow::on_Load_from_json_Button_clicked);
     fileMenu->addAction(tr("&Save to Json"), this, &MainWindow::on_Save_to_json_Button_clicked);
     fileMenu->addAction(tr("E&xit"), this, &QWidget::close, QKeySequence::Quit);
     xmlParser = new XmlParser();
@@ -126,24 +125,6 @@ void MainWindow::on_choose_file_button_2_clicked()
     QTextStream stream(&file);
     stream << document.toString();
     file.close();
-}
-
-//Работа с Json
-void MainWindow::on_Load_from_json_Button_clicked()
-{
-    if(model) delete model;
-    model = new QStandardItemModel(0,1,this);
-    ui->treeView->setModel(model);
-
-    QStandardItem *root = new QStandardItem("Root");//toStdItem(sett2,"Root");
-    QString filename = QFileDialog::getOpenFileName(this,
-                                              tr("Open JSON"), ".",
-                                              tr("Json files (*.json)"));
-    if(filename != ""){
-            //   read(filename);
-    }
-
-
 }
 
 
