@@ -18,7 +18,7 @@ QStandardItem* XmlParser::read(const QByteArray byteArray,  TypeFile& type)
     document.clear();
     if(type.value() == TypeFile::Value::Json){
 
-
+        qDebug() << "JSON";
         QString jsonStr = byteArray;
         jsondocument = QJsonDocument::fromJson(jsonStr.toUtf8());
         QJsonObject jsonObject = jsondocument.object();
@@ -27,11 +27,13 @@ QStandardItem* XmlParser::read(const QByteArray byteArray,  TypeFile& type)
         document.appendChild(tree);
     }
     else{
-        if(type.value() == TypeFile::Value::Json){
+        if(type.value() == TypeFile::Value::Xml){
+            qDebug() << "XML";
             document.setContent(byteArray);
             tree = document.firstChild().toElement();
         }
         else {
+            qDebug() << "I DONT KNOW";
             return new QStandardItem();
         }
     }
