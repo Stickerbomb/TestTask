@@ -6,6 +6,9 @@
 #include <QMessageBox>
 #include <QDomElement>
 
+#define XML_FILES "Xml files (*.xml)"
+#define JSON_FILES "JSON files (*.json)"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow),
@@ -15,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(tr("&Open XML..."), this, &MainWindow::on_choose_file_button_clicked, QKeySequence::Open);
+    fileMenu->addAction(tr("&Open"), this, &MainWindow::on_open_file_clicked, QKeySequence::Open);
     fileMenu->addAction(tr("&Save to XML"), this, &MainWindow::on_choose_file_button_2_clicked, QKeySequence::Save);
     fileMenu->addAction(tr("&Open Json..."), this, &MainWindow::on_Load_from_json_Button_clicked);
     fileMenu->addAction(tr("&Save to Json"), this, &MainWindow::on_Save_to_json_Button_clicked);
@@ -29,73 +32,31 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::on_choose_file_button_clicked()
+void MainWindow::on_open_file_clicked()
 {
        /* Вызываем диалог выбора файла для чтения */
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open"), ".",
-                                                      TypeFile::filtersList());
-    if(filename != ""){
-               read(filename);
-    }
-
-    model->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
-//    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Attributes")));
-//    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Text")));
-}
-
-void MainWindow::read(QString Filename)
-{
     if(model) delete model;
+    QString selectedFilter;
+
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open"), ".",
+                                                      XML_FILES ";;" JSON_FILES, &selectedFilter);
     model = new QStandardItemModel(0,1,this);
+    model->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
     ui->treeView->setModel(model);
-
-    QDomNode xmlroot ;
-    //load the xml file
-    QFile file(Filename);
-    QStandardItem *root = new QStandardItem(document.firstChild().nodeName());
-    if(file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        TypeFile *tpFile = new TypeFile(TypeFile::fromString(Filename));
-         root =xmlParser->read(file.readAll(),*tpFile);
-    }
-    file.close();
-    model->appendRow(root);
-
-
-}
-
-void MainWindow::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
-{
-    const auto domNodeList = _elem.childNodes();
-    for (int i = 0; i < domNodeList.length(); ++i) {
-        const auto domNode = domNodeList.at(i);
-        QDomElement domElement = domNode.toElement();
-        const QDomNamedNodeMap attributeMap = domNode.attributes();
-
-        QStringList attributes;
-        for (int i = 0; i < attributeMap.count(); ++i) {
-          QDomNode attribute = attributeMap.item(i);
-          attributes << attribute.nodeName() + "=\"" + attribute.nodeValue() + '"';
+    if(filename != ""){
+        TypeFile *tpFile = new TypeFile(TypeFile::fromString(selectedFilter));//Get type of file
+        //load the xml file
+        QFile file(filename);
+        QStandardItem *root = new QStandardItem(document.firstChild().nodeName());
+        if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+           root =xmlParser->read(file.readAll(),*tpFile);
         }
-        // QStringList to QList<QStandartItem*> for appending to columns
-        QString atr;
-        for (const auto &i : attributes) {
-            atr += i + " ";
-        }
-        QStandardItem *node = new QStandardItem(domElement.nodeName());
-        if(domNode.hasAttributes()){
-            QStandardItem *atr_item = new QStandardItem(atr);
-            node->appendRow(atr_item);
-        }
-        if ((!domNode.hasChildNodes() || !domNode.firstChild().isElement()) && domElement.text() != "") {
-            node->appendRow(new QStandardItem(domElement.text()));
-        }
-        _Model->appendRow(node);
-        if (domNode.hasChildNodes() && domNode.firstChild().isElement()) {
-            traverseShow(domNode, node);
-        }
+        file.close();
+        model->appendRow(root);
     }
 }
+
 
 
 
@@ -179,7 +140,7 @@ void MainWindow::on_Load_from_json_Button_clicked()
                                               tr("Open JSON"), ".",
                                               tr("Json files (*.json)"));
     if(filename != ""){
-               read(filename);
+            //   read(filename);
     }
 
 

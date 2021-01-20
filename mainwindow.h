@@ -19,11 +19,10 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_choose_file_button_clicked();
+    void on_open_file_clicked();
 
     void on_choose_file_button_2_clicked();
 
-    void on_Load_from_json_Button_clicked();
 
     void on_Save_to_json_Button_clicked();
 
@@ -38,8 +37,6 @@ private:
     XmlParser *xmlParser;
     Ui::MainWindow *ui;
     QStandardItemModel *model;
-    void read(QString Filename);
     void writeXML(QStandardItem *item, QDomNode &dom_root);
-    void traverseShow(const QDomNode &_elem, QStandardItem *subModel);
 };
 #endif // MAINWINDOW_H

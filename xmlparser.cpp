@@ -16,29 +16,32 @@ QStandardItem* XmlParser::read(const QByteArray byteArray,  TypeFile& type)
     QStandardItem *treeStdItem;
     QDomElement tree;
     document.clear();
-    if(type.value() == TypeFile::Value::Json){
+    switch(type.value()){
+        case TypeFile::Value::Json:{
 
-        qDebug() << "JSON";
-        QString jsonStr = byteArray;
-        jsondocument = QJsonDocument::fromJson(jsonStr.toUtf8());
-        QJsonObject jsonObject = jsondocument.object();
-        tree = jsonToDom("Root", jsonObject);
-
-        document.appendChild(tree);
-    }
-    else{
-        if(type.value() == TypeFile::Value::Xml){
-            qDebug() << "XML";
-            document.setContent(byteArray);
-            tree = document.firstChild().toElement();
+            qDebug() << "JSON";
+            QString jsonStr = byteArray;
+            jsondocument = QJsonDocument::fromJson(jsonStr.toUtf8());
+            QJsonObject jsonObject = jsondocument.object();
+            tree = jsonToXml("Root", jsonObject);
+            document.appendChild(tree);
+            break;
         }
-        else {
-            qDebug() << "I DONT KNOW";
-            return new QStandardItem();
+        case TypeFile::Value::Xml:{
+                qDebug() << "XML";
+                document.setContent(byteArray);
+                tree = document.firstChild().toElement();
+                break;
+        }
+
+        case TypeFile::Value::Undefined:{
+                qDebug() << "I DONT KNOW";
+                return new QStandardItem();
+                break;
         }
     }
     treeStdItem = new QStandardItem(document.firstChild().nodeName());
-    traverseShow(tree,treeStdItem);
+    xmlToTree(tree,treeStdItem);
     return treeStdItem;
 }
 
@@ -60,7 +63,7 @@ void XmlParser::writeToFile(QString filename, QString type)
     file.close();
 }
 
-void XmlParser::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
+void XmlParser::xmlToTree(const QDomNode &_elem, QStandardItem *_Model)
 {
     const auto domNodeList = _elem.childNodes();
     for (int i = 0; i < domNodeList.length(); ++i) {
@@ -88,7 +91,7 @@ void XmlParser::traverseShow(const QDomNode &_elem, QStandardItem *_Model)
         }
         _Model->appendRow(node);
         if (domNode.hasChildNodes() && domNode.firstChild().isElement()) {
-            traverseShow(domNode, node);
+            xmlToTree(domNode, node);
         }
     }
 }
@@ -242,15 +245,15 @@ QJsonValue* XmlParser::stringToJson(QString str)
     // Double dec = str.toDouble(&ok, 10);
 }
 
-QDomElement XmlParser::jsonToDom(QJsonObject jsondoc, const QString name) {
+QDomElement XmlParser::jsonToXml(QJsonObject jsondoc, const QString name) {
     QDomElement result = document.createElement(name);
     for (const auto &key : jsondoc.keys()) {
-        result.appendChild(jsonToDom(key, jsondoc.value(key)));
+        result.appendChild(jsonToXml(key, jsondoc.value(key)));
     }
     return result;
 }
 
-QDomElement XmlParser::jsonToDom(const QString &key, const QJsonValue &value) {
+QDomElement XmlParser::jsonToXml(const QString &key, const QJsonValue &value) {
     QDomElement node = document.createElement(key);
     int i=0;
     switch (value.type()) {
@@ -277,7 +280,7 @@ QDomElement XmlParser::jsonToDom(const QString &key, const QJsonValue &value) {
         case QJsonValue::Type::Array:
 //            qDebug() << key << ": [array] ";
             for (const auto &o : value.toArray()) {
-                node.appendChild(jsonToDom(key + QString::fromStdString( std::to_string(i)), o));
+                node.appendChild(jsonToXml(key + QString::fromStdString( std::to_string(i)), o));
                 i++;
             }
             break;
@@ -285,7 +288,7 @@ QDomElement XmlParser::jsonToDom(const QString &key, const QJsonValue &value) {
         case QJsonValue::Type::Object:
 //            qDebug() << key << ": [object] ";
 
-            node = jsonToDom(value.toObject(),key);
+            node = jsonToXml(value.toObject(),key);
             break;
     }
     return node;
