@@ -9,13 +9,10 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow),
-      model(nullptr)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-
-    model = new QStandardItemModel(0,1,this);
 
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(tr("&Open"), this, &MainWindow::on_open_file_clicked, QKeySequence::Open);
@@ -34,7 +31,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_open_file_clicked()
 {
        /* Вызываем диалог выбора файла для чтения */
-    model->clear();
     ui->treeWidget->clear();
     QString selectedFilter;
 
@@ -60,12 +56,10 @@ void MainWindow::on_choose_file_button_2_clicked()
 {
 
     document.clear();
-    if(model){
-        QDomNode root = document.createElement((model->item(0,0)->text()));
-        xmlParser->writeXML(ui->treeWidget->itemAt(0,0),root);
-        document.appendChild(root);
+    QDomNode root = document.createElement(ui->treeWidget->itemAt(0,0)->text(0));
+    xmlParser->writeXML(ui->treeWidget->itemAt(0,0),root);
+    document.appendChild(root);
 
-    }
 
     //Сохранить в файл
     QString file_name;

@@ -36,6 +36,5 @@ private:
     QDomDocument document;
     XmlParser *xmlParser;
     Ui::MainWindow *ui;
-    QStandardItemModel *model;
 };
 #endif // MAINWINDOW_H
