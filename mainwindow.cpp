@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     model = new QStandardItemModel(0,1,this);
-    ui->treeView->setModel(model);
 
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(tr("&Open"), this, &MainWindow::on_open_file_clicked, QKeySequence::Open);
@@ -36,6 +35,7 @@ void MainWindow::on_open_file_clicked()
 {
        /* Вызываем диалог выбора файла для чтения */
     model->clear();
+    ui->treeWidget->clear();
     QString selectedFilter;
 
     QString filename = QFileDialog::getOpenFileName(this, tr("Open"), ".",
@@ -44,14 +44,14 @@ void MainWindow::on_open_file_clicked()
         TypeFile *tpFile = new TypeFile(TypeFile::fromString(selectedFilter));//Get type of file
         //load the xml file
         QFile file(filename);
-        QStandardItem *root = new QStandardItem(document.firstChild().nodeName());
         if(file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-           root =xmlParser->read(file.readAll(),*tpFile);
+            qDebug()<< "Danone";
+           ui->treeWidget->insertTopLevelItem(0, xmlParser->read(file.readAll(),*tpFile));
+           qDebug()<< "Danone2";
         }
         file.close();
-        model->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
-        model->appendRow(root);
+        ui->treeWidget->model();
     }
 }
 
@@ -62,7 +62,7 @@ void MainWindow::on_choose_file_button_2_clicked()
     document.clear();
     if(model){
         QDomNode root = document.createElement((model->item(0,0)->text()));
-        xmlParser->writeXML(model->item(0,0),root);
+        xmlParser->writeXML(ui->treeWidget->itemAt(0,0),root);
         document.appendChild(root);
 
     }
@@ -110,9 +110,5 @@ void MainWindow::on_Save_to_json_Button_clicked()
 
 void MainWindow::on_addButton_clicked()
 {
-    QModelIndexList indexes = ui->treeView->selectionModel()->selectedIndexes();
-    if(!indexes.isEmpty()){
-        qDebug() << ui->treeView->currentIndex();
-       // model->item(currentIndex.row(), currentIndex.column())->appendRow(new QStandardItem(""));
-    }
+
 }
