@@ -6,8 +6,6 @@
 #include <QMessageBox>
 #include <QDomElement>
 
-#define XML_FILES "Xml files (*.xml)"
-#define JSON_FILES "JSON files (*.json)"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,6 +14,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+
+    model = new QStandardItemModel(0,1,this);
+    ui->treeView->setModel(model);
 
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(tr("&Open"), this, &MainWindow::on_open_file_clicked, QKeySequence::Open);
@@ -34,14 +35,11 @@ MainWindow::~MainWindow()
 void MainWindow::on_open_file_clicked()
 {
        /* Вызываем диалог выбора файла для чтения */
-    if(model) delete model;
+    model->clear();
     QString selectedFilter;
 
     QString filename = QFileDialog::getOpenFileName(this, tr("Open"), ".",
-                                                      XML_FILES ";;" JSON_FILES, &selectedFilter);
-    model = new QStandardItemModel(0,1,this);
-    model->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
-    ui->treeView->setModel(model);
+                                                      TypeFile::filtersList(), &selectedFilter);
     if(filename != ""){
         TypeFile *tpFile = new TypeFile(TypeFile::fromString(selectedFilter));//Get type of file
         //load the xml file
@@ -52,6 +50,7 @@ void MainWindow::on_open_file_clicked()
            root =xmlParser->read(file.readAll(),*tpFile);
         }
         file.close();
+        model->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
         model->appendRow(root);
     }
 }
@@ -113,7 +112,7 @@ void MainWindow::on_addButton_clicked()
 {
     QModelIndexList indexes = ui->treeView->selectionModel()->selectedIndexes();
     if(!indexes.isEmpty()){
-        qDebug() << ui->treeView->currentIndex().model();
+        qDebug() << ui->treeView->currentIndex();
        // model->item(currentIndex.row(), currentIndex.column())->appendRow(new QStandardItem(""));
     }
 }
