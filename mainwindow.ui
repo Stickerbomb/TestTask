@@ -24,6 +24,12 @@
     </item>
     <item>
      <widget class="QTreeWidget" name="treeWidget">
+      <property name="editTriggers">
+       <set>QAbstractItemView::CurrentChanged|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+      </property>
+      <property name="expandsOnDoubleClick">
+       <bool>false</bool>
+      </property>
       <column>
        <property name="text">
         <string notr="true">1</string>

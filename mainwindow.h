@@ -23,17 +23,12 @@ private slots:
     void on_save_file_clicked();
 
 
-    void on_Save_to_json_Button_clicked();
-
-
     void on_addButton_clicked();
 
 private:
 
     QMenu *fileMenu;
-    QJsonDocument jsondocument;
-    QDomDocument document;
-    XmlParser *xmlParser;
+    std::unique_ptr<XmlParser> xmlParser;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

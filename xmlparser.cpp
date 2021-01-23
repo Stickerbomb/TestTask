@@ -11,9 +11,9 @@ XmlParser::XmlParser()
 
 }
 
-QTreeWidgetItem* XmlParser::read(const QByteArray byteArray,  TypeFile& type)
+QTreeWidgetItem* XmlParser::read(const QByteArray byteArray, const TypeFile& type)
 {
-    QTreeWidgetItem *treeStdItem;
+    QTreeWidgetItem *treeItem;
     QDomElement root;
     document.clear();
     switch(type.value()){
@@ -37,16 +37,14 @@ QTreeWidgetItem* XmlParser::read(const QByteArray byteArray,  TypeFile& type)
                 return nullptr;
         }
     }
-    QStringList name;
-    name.append(document.firstChild().nodeName());
-    treeStdItem = new QTreeWidgetItem(name);
-    xmlToTree(root,treeStdItem);
-    return treeStdItem;
+    treeItem = new QTreeWidgetItem({document.firstChild().nodeName()});
+    xmlToTree(root,treeItem);
+    return treeItem;
 }
 
-QString XmlParser::writeToFile(QTreeWidgetItem *source, TypeFile& type)
+QByteArray XmlParser::write(QTreeWidgetItem *source, const TypeFile& type)
 {
-    QString result;
+    QByteArray result;
     switch(type.value()){
             case TypeFile::Value::Json:{
             QJsonDocument jsonDocument = QJsonDocument();
@@ -55,16 +53,18 @@ QString XmlParser::writeToFile(QTreeWidgetItem *source, TypeFile& type)
             qDebug() << "SAVE JSON";
             jsonDocument.setObject(rootObject); // set to json document
 
-            result =jsonDocument.toJson();
+            result = jsonDocument.toJson();
             break;
         }
         case TypeFile::Value::Xml:{
                 qDebug() << "SAVE XML";
-                QDomElement root = document.createElement("Root");
-                writeXML(source,root);
+                QDomNode root = document.createElement("Root");
                 document.clear();
+                writeXML(source,root);
                 document.appendChild(root);
-                result = document.toString();
+
+                result = document.toByteArray();
+                qDebug () << root.firstChild().nodeName();
                 break;
         }
 
@@ -101,9 +101,7 @@ void XmlParser::xmlToTree(const QDomNode &_elem, QTreeWidgetItem *parentItem)
             node->addChild(atr_item);
         }
         if ((!domNode.hasChildNodes() || !domNode.firstChild().isElement()) && domElement.text() != "") {
-            QStringList text;
-            text.append(domElement.text());
-            node->addChild(new QTreeWidgetItem(text));
+            node->addChild(new QTreeWidgetItem({domElement.text()}));
         }
         parentItem->addChild(node);
         if (domNode.hasChildNodes() && domNode.firstChild().isElement()) {
@@ -118,12 +116,12 @@ void XmlParser::writeXML(QTreeWidgetItem *item, QDomNode &dom_root)
     for(int i = 0; i< item->childCount(); i++){
         if(item->child(i)->childCount()>0){
             QDomText newNodeText;
-            if(!(item->child(i)->child(1)->childCount()>0)){
+            if(item->child(i)->child(1)->childCount() == 0){
                     newNodeText = document.createTextNode(item->child(i)->child(1)->text(0));
             }
             QDomElement domelem = document.createElement(item->child(i)->text(0));
             domelem.appendChild(newNodeText);
-            if(item->child(i)->child(0)->childCount()==0){
+            if(item->child(i)->child(0)->childCount() == 0){
                 QStringList listArguments = item->child(i)->child(0)->text(0).split(' ');
 //                qDebug() << listArguments << "  ATRIBUTES  ";
                 foreach(QString attr, listArguments){

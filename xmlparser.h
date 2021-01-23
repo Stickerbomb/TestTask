@@ -10,8 +10,8 @@ class XmlParser
 public:
     XmlParser();
 
-    QTreeWidgetItem* read(const QByteArray byteArray,  TypeFile& type);
-    QString writeToFile(QTreeWidgetItem *source, TypeFile& type);
+    QTreeWidgetItem* read(const QByteArray byteArray, const TypeFile& type);
+    QByteArray write(QTreeWidgetItem *source, const TypeFile& type);
     void writeXML(QTreeWidgetItem *item, QDomNode &dom_root);
 private:
 

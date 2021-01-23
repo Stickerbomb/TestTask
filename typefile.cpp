@@ -7,7 +7,7 @@ TypeFile::TypeFile()
 {
 }
 
-TypeFile::Value TypeFile::value()
+TypeFile::Value TypeFile::value() const
 {
     return m_value;
 }

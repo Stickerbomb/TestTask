@@ -12,7 +12,7 @@ public:
     TypeFile();
     enum class Value { Xml, Json, Undefined };
     TypeFile(const TypeFile::Value& value) : m_value(value){}
-    Value value();
+    Value value() const;
     static QString filtersList();
     static Value fromString(const QString &TypeStringName);
 
