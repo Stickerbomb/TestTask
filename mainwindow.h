@@ -3,7 +3,6 @@
 
 #include "xmlparser.h"
 #include <QMainWindow>
-#include <QStandardItemModel>
 #include <QtXml>
 
 QT_BEGIN_NAMESPACE
@@ -21,7 +20,7 @@ public:
 private slots:
     void on_open_file_clicked();
 
-    void on_choose_file_button_2_clicked();
+    void on_save_file_clicked();
 
 
     void on_Save_to_json_Button_clicked();
