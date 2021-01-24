@@ -114,15 +114,17 @@ void XmlParser::writeXML(QTreeWidgetItem *item, QDomNode &dom_root)
 {
 
     for(int i = 0; i< item->childCount(); i++){
+
         if(item->child(i)->childCount()>0){
+            QTreeWidgetItem *currentItem = item->child(i);
             QDomText newNodeText;
-            if(item->child(i)->child(1)->childCount() == 0){
-                    newNodeText = document.createTextNode(item->child(i)->child(1)->text(0));
+            if(currentItem->childCount()>1 && currentItem->child(1)->childCount() == 0){
+                    newNodeText = document.createTextNode(currentItem->child(1)->text(0));
             }
-            QDomElement domelem = document.createElement(item->child(i)->text(0));
+            QDomElement domelem = document.createElement(currentItem->text(0));
             domelem.appendChild(newNodeText);
-            if(item->child(i)->child(0)->childCount() == 0){
-                QStringList listArguments = item->child(i)->child(0)->text(0).split(' ');
+            if(currentItem->child(0)->childCount() == 0){
+                QStringList listArguments = currentItem->child(0)->text(0).split(' ');
 //                qDebug() << listArguments << "  ATRIBUTES  ";
                 foreach(QString attr, listArguments){
                     QStringList param = attr.split('=');
