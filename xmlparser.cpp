@@ -49,8 +49,8 @@ QByteArray XmlParser::write(QTreeWidgetItem *source, const TypeFile& type)
             case TypeFile::Value::Json:{
             QJsonDocument jsonDocument = QJsonDocument();
             QJsonObject rootObject = jsonDocument.object();
-            writeJson(source,rootObject);
             qDebug() << "SAVE JSON";
+            writeJson(source,rootObject);
             jsonDocument.setObject(rootObject); // set to json document
 
             result = jsonDocument.toJson();
@@ -155,24 +155,26 @@ void XmlParser::writeJson(QTreeWidgetItem *item, QJsonObject &json_root)
 {
     for(int i = 0; i< item->childCount(); i++){
         QTreeWidgetItem *currentItem = item->child(i);
+        if(currentItem->childCount() > 0){
+                if(currentItem->childCount() > 1 || currentItem->child(0)->childCount() > 0){
+                    if(currentItem->child(0)->text(0) == currentItem->text(0) + "0"){
+                        currentItem->text(0) = currentItem->text(0).remove(currentItem->text(0).length()-2,1);
+                        QJsonArray  *jArray = new QJsonArray();
+                        writeJson(currentItem,*jArray);
+                        json_root.insert(currentItem->child(0)->text(0), *jArray);
+                    }
+                    else{
+                        QJsonObject *jsonObject = new QJsonObject();
+                        writeJson(currentItem,*jsonObject);
+                        json_root.insert(currentItem->child(0)->text(0 ),*jsonObject);
 
-        if(currentItem->childCount()>1 || currentItem->child(0)->childCount()>0){
-            if(currentItem->child(0)->text(0) == currentItem->text(0) + "0"){
-                QJsonArray  *jArray = new QJsonArray();
-                writeJson(currentItem,*jArray);
-                json_root.insert(currentItem->child(0)->text(0), *jArray);
-            }
-            else{
-                QJsonObject *jsonObject = new QJsonObject();
-                writeJson(currentItem,*jsonObject);
-                json_root.insert(currentItem->child(0)->text(0 ),*jsonObject);
+                    }
+                }
+                else{
+                    QJsonValue *value = stringToJson(currentItem->child(0)->text(0));
+                    json_root.insert(currentItem->text(0),*value);
 
-            }
-        }
-        else{
-            QJsonValue *value = stringToJson(currentItem->child(0)->text(0));
-            json_root.insert(currentItem->text(0),*value);
-
+                }
         }
     }
 
@@ -183,26 +185,28 @@ void XmlParser::writeJson(QTreeWidgetItem *item, QJsonArray &json_root)
     for(int i = 0; i< item->childCount(); i++){
         QTreeWidgetItem *currentItem = item->child(i);
 
-        if(currentItem->childCount()>1 || currentItem->child(0)->childCount()>0){
-            if(currentItem->child(0)->text(0) == currentItem->text(0) + "0"){
-                QJsonArray  *jArray = new QJsonArray();
-                writeJson(currentItem,*jArray);
-                json_root.append(*jArray);
-            }
-            else{
-                QJsonObject *jsonObject = new QJsonObject();
-                writeJson(currentItem,*jsonObject);
-                json_root.append(*jsonObject);
+        if(currentItem->childCount() > 0){// (childCount() > 0) вместо (hasChildren())
+                if(currentItem->childCount() > 1 || currentItem->child(0)->childCount() > 0){//Проверка на непростую ноду
+                    if(currentItem->child(0)->text(0) == currentItem->text(0) + "0"){//Проверка на массив
+                        QJsonArray  *jArray = new QJsonArray();
+                        writeJson(currentItem,*jArray);
+                        json_root.append(*jArray);
+                    }
+                    else{//Не простой итем и не массив, значит объект
+                        QJsonObject *jsonObject = new QJsonObject();
+                        writeJson(currentItem,*jsonObject);
+                        json_root.append(*jsonObject);
 
-            }
-        }
-        else{
-            QJsonValue *value = new QJsonValue(currentItem->child(0)->text(0));
-            json_root.append(*value);
+                    }
+                }
+                else{
+                    QJsonValue *value = stringToJson(currentItem->child(0)->text(0));
+                    json_root.append(*value);
 
+                }
         }
+
     }
-
 }
 
 QTreeWidgetItem* XmlParser::toWidgetItem(const QJsonArray &jarray, QString parent)
@@ -315,7 +319,7 @@ QTreeWidgetItem *XmlParser::toWidgetItem(const QJsonObject &jo, QString parent)
 
 QJsonValue* XmlParser::stringToJson(QString str)
 {
-    QJsonValue *result = new QJsonValue();
+    QJsonValue *result;
     if(str== "true" || str == "false"){
         if(str=="true"){
             result= new QJsonValue(true);
@@ -332,6 +336,7 @@ QJsonValue* XmlParser::stringToJson(QString str)
         return result;
     }
     result = new QJsonValue(str);
+    return result;
 }
 
 QDomElement XmlParser::jsonToXml(QJsonObject jsondoc, const QString name) {
