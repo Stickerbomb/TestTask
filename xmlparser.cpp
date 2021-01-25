@@ -90,14 +90,13 @@ void XmlParser::xmlToTree(const QDomNode &_elem, QTreeWidgetItem *parentItem)
           QDomNode attribute = attributeMap.item(i);
           attributes << attribute.nodeName() + "=\"" + attribute.nodeValue() + '"';
         }
-        // QStringList to QList<QStandartItem*> for appending to columns
         QString atr = attributes.join(" ");
         QStringList name;
         name.append(domElement.nodeName());
         QTreeWidgetItem *node = new QTreeWidgetItem(name);
         if(domNode.hasAttributes()){
 
-            QTreeWidgetItem *atr_item = new QTreeWidgetItem(attributes);
+            QTreeWidgetItem *atr_item = new QTreeWidgetItem({atr});
             node->addChild(atr_item);
         }
         if ((!domNode.hasChildNodes() || !domNode.firstChild().isElement()) && domElement.text() != "") {
@@ -160,7 +159,7 @@ void XmlParser::writeJson(QTreeWidgetItem *item, QJsonObject &json_root)
         if(currentItem->childCount() > 0){
                 if(currentItem->childCount() > 1 || currentItem->child(0)->childCount() > 0){
                     if(currentItem->child(0)->text(0) == currentItem->text(0) + "0"){
-                        currentItem->text(0) = currentItem->text(0).remove(currentItem->text(0).length()-2,1);
+                        currentItem->child(0)->text(0) = currentItem->child(0)->text(0).remove(currentItem->child(0)->text(0).length()-2,1);
                         QJsonArray  *jArray = new QJsonArray();
                         writeJson(currentItem,*jArray);
                         json_root.insert(currentItem->child(0)->text(0), *jArray);
@@ -173,7 +172,8 @@ void XmlParser::writeJson(QTreeWidgetItem *item, QJsonObject &json_root)
                     }
                 }
                 else{
-                    QJsonValue *value = stringToJson(currentItem->child(0)->text(0));
+//                    qDebug() << currentItem->child(0)->text(0).remove('\"');
+                    QJsonValue *value = stringToJson(currentItem->child(0)->text(0).remove('\"'));
                     json_root.insert(currentItem->text(0),*value);
 
                 }
@@ -190,6 +190,7 @@ void XmlParser::writeJson(QTreeWidgetItem *item, QJsonArray &json_root)
         if(currentItem->childCount() > 0){// (childCount() > 0) вместо (hasChildren())
                 if(currentItem->childCount() > 1 || currentItem->child(0)->childCount() > 0){//Проверка на непростую ноду
                     if(currentItem->child(0)->text(0) == currentItem->text(0) + "0"){//Проверка на массив
+                        currentItem->child(0)->text(0) = currentItem->child(0)->text(0).remove(currentItem->child(0)->text(0).length()-2,2);
                         QJsonArray  *jArray = new QJsonArray();
                         writeJson(currentItem,*jArray);
                         json_root.append(*jArray);
@@ -202,7 +203,7 @@ void XmlParser::writeJson(QTreeWidgetItem *item, QJsonArray &json_root)
                     }
                 }
                 else{
-                    QJsonValue *value = stringToJson(currentItem->child(0)->text(0));
+                    QJsonValue *value = stringToJson(currentItem->child(0)->text(0).remove('\"'));
                     json_root.append(*value);
 
                 }
