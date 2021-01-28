@@ -1,26 +1,28 @@
 #ifndef XMLPARSER_H
 #define XMLPARSER_H
 
-#include "typefile.h"
 #include <QtXml>
-#include <QTreeWidgetItem>
+
+class TypeFile;
+class TreeItem;
 
 class XmlParser
 {
 public:
     XmlParser();
+    ~XmlParser();
 
-    QTreeWidgetItem* read(const QByteArray byteArray, const TypeFile& type);
-    QByteArray write(QTreeWidgetItem *source, const TypeFile& type);
-    void writeXML(QTreeWidgetItem *item, QDomNode &dom_root);
+    TreeItem* read(const QByteArray byteArray, const TypeFile& type);
+    QByteArray write(TreeItem *source, const TypeFile& type);
+    void writeXML(TreeItem *item, QDomNode &dom_root);
 private:
 
-    void xmlToTree(const QDomNode &_elem, QTreeWidgetItem *_Model);
-    void writeJson(QTreeWidgetItem *item, QJsonObject &json_root);
-    void writeJson(QTreeWidgetItem *item, QJsonArray &json_root);
+    void xmlToTree(const QDomNode &_elem, TreeItem *_item);
+    void writeJson(TreeItem *item, QJsonObject &json_root);
+    void writeJson(TreeItem *item, QJsonArray &json_root);
     QJsonValue* stringToJson(QString str);
-    QTreeWidgetItem* toWidgetItem(const QJsonArray &jarray, QString parent);
-    QTreeWidgetItem* toWidgetItem(const QJsonObject &jo, QString parent);
+    TreeItem* toWidgetItem(const QJsonArray &jarray, QString parent);
+    TreeItem* toWidgetItem(const QJsonObject &jo, QString parent);
     QDomElement jsonToXml(const QString &key, const QJsonValue &value);
     QDomElement jsonToXml(QJsonObject jsondoc, const QString name);
     QJsonDocument jsondocument;

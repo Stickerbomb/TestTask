@@ -1,34 +1,29 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "ui_mainwindow.h"
 #include "xmlparser.h"
+
 #include <QMainWindow>
-#include <QtXml>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
 
 private slots:
-    void on_open_file_clicked();
+    void insertChild();
+    void insertRow();
+    void removeRow();
 
+    void on_open_file_clicked();
     void on_save_file_clicked();
 
-
-    void on_addButton_clicked();
-
 private:
-
     QMenu *fileMenu;
     std::unique_ptr<XmlParser> xmlParser;
-    Ui::MainWindow *ui;
 };
+
 #endif // MAINWINDOW_H
