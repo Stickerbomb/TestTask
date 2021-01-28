@@ -30,16 +30,21 @@ void MainWindow::insertChild()
     const QModelIndex index = view->selectionModel()->currentIndex();
     QAbstractItemModel *model = view->model();
 
-    if (!model->insertRow(0, index))
-        return;
+    qDebug()<< 0;
 
+    qDebug()<< 1;
+
+    if (!model->insertRow(model->rowCount(), index))
+        return;
 
     const QModelIndex child = model->index(model->rowCount(), 0, index);
     model->setData(child, QVariant(tr("[Empty node]")), Qt::EditRole);
 
+    qDebug()<< 2;
 
-    view->selectionModel()->setCurrentIndex(model->index(0, 0, index),
-                                            QItemSelectionModel::ClearAndSelect);
+//    view->selectionModel()->setCurrentIndex(model->index(0, 0, index),
+//                                            QItemSelectionModel::ClearAndSelect);
+//    qDebug()<< 3;
 }
 
 void MainWindow::insertRow()

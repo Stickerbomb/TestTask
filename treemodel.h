@@ -7,7 +7,6 @@
 
 class TreeItem;
 
-//! [0]
 class TreeModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -40,6 +39,5 @@ private:
 
     TreeItem *rootItem;
 };
-//! [2]
 
 #endif // TREEMODEL_H
