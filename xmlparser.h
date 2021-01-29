@@ -21,8 +21,8 @@ private:
     void writeJson(TreeItem *item, QJsonObject &json_root);
     void writeJson(TreeItem *item, QJsonArray &json_root);
     QJsonValue* stringToJson(QString str);
-    TreeItem* toWidgetItem(const QJsonArray &jarray, QString parent);
-    TreeItem* toWidgetItem(const QJsonObject &jo, QString parent);
+    TreeItem* jsonToTreeItem(const QJsonArray &jarray, QString parent);
+    TreeItem* jsonToTreeItem(const QJsonObject &jo, QString parent);
     QDomElement jsonToXml(const QString &key, const QJsonValue &value);
     QDomElement jsonToXml(QJsonObject jsondoc, const QString name);
     QJsonDocument jsondocument;

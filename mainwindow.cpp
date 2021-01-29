@@ -71,7 +71,6 @@ void MainWindow::on_open_file_clicked()
             TreeModel *model = new TreeModel();
             model->setupModelData(xmlParser->read(file.readAll(),typeFile));
             view->setModel(model);
-            qDebug() << model->getRootItem()->data().toString();
         }
         file.close();
     }
