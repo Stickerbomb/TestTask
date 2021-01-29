@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Editable Tree Model</string>
+   <string>XML Json Editor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout">
@@ -66,6 +66,7 @@
     </property>
     <addaction name="actionOpen_file"/>
     <addaction name="actionSave_to_file"/>
+    <addaction name="separator"/>
     <addaction name="exitAction"/>
    </widget>
    <widget class="QMenu" name="actionsMenu">
@@ -73,7 +74,6 @@
      <string>&amp;Actions</string>
     </property>
     <addaction name="insertRowAction"/>
-    <addaction name="separator"/>
     <addaction name="removeRowAction"/>
     <addaction name="separator"/>
     <addaction name="insertChildAction"/>

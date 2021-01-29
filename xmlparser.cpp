@@ -97,7 +97,7 @@ void XmlParser::xmlToTree(const QDomNode &_elem, TreeItem *parentItem)
             TreeItem *item = new TreeItem({QVariant(atr)},treeItem);
             treeItem->addChild(item);
         }
-        if ((!domNode.hasChildNodes() || !domNode.firstChild().isElement()) && domElement.text() != "") {
+        if (domElement.text() != "") {
             TreeItem *item = new TreeItem({QVariant(domElement.text())},treeItem);
             treeItem->addChild(item);
         }
@@ -112,15 +112,10 @@ void XmlParser::writeXML(TreeItem *item, QDomNode &dom_root)
 {
 
     for(int i = 0; i< item->childCount(); i++){
+        TreeItem *currentItem = item->child(i);
 
-        if(item->child(i)->childCount()>0){
-            TreeItem *currentItem = item->child(i);
-            QDomText newNodeText;
-            if(currentItem->childCount()>1 && currentItem->child(1)->childCount()==0){
-                    newNodeText = document.createTextNode(currentItem->child(1)->data().toString());
-            }
+        if(currentItem->childCount()>0){
             QDomElement domelem = document.createElement(currentItem->data().toString());
-            domelem.appendChild(newNodeText);
             if(currentItem->child(0)->childCount()==0){
                 QStringList listArguments = currentItem->child(0)->data().toString().split(' ');
                 foreach(QString attr, listArguments){
@@ -129,10 +124,15 @@ void XmlParser::writeXML(TreeItem *item, QDomNode &dom_root)
                     param.last().remove('\"');
                     domelem.setAttribute(param.first(),param.last());
                 }
-
             }
             dom_root.appendChild(domelem);
             writeXML(item->child(i),domelem);
+        }
+        else{
+            if(i!=0){
+                QDomText newNodeText = document.createTextNode(currentItem->data().toString());
+                dom_root.appendChild(newNodeText);
+            }
         }
     }
 

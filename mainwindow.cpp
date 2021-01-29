@@ -25,26 +25,19 @@ MainWindow::MainWindow(QWidget *parent)
     xmlParser = std::make_unique<XmlParser>();
 }
 
-void MainWindow::insertChild()
-{
-    const QModelIndex index = view->selectionModel()->currentIndex();
-    QAbstractItemModel *model = view->model();
+void MainWindow::insertChild() {
 
-    qDebug()<< 0;
+  const QModelIndex index = view->selectionModel()->currentIndex();
+  QAbstractItemModel *model = view->model();
 
-    qDebug()<< 1;
+  if (!model->insertRow(0, index))
+    return;
 
-    if (!model->insertRow(model->rowCount(), index))
-        return;
+  const QModelIndex child = model->index(0, 0, index);
+  model->setData(child, QVariant(tr("Empty_node")), Qt::EditRole);
 
-    const QModelIndex child = model->index(model->rowCount(), 0, index);
-    model->setData(child, QVariant(tr("[Empty node]")), Qt::EditRole);
-
-    qDebug()<< 2;
-
-//    view->selectionModel()->setCurrentIndex(model->index(0, 0, index),
-//                                            QItemSelectionModel::ClearAndSelect);
-//    qDebug()<< 3;
+  view->selectionModel()->setCurrentIndex(model->index(0, 0, index),
+                                          QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::insertRow()
