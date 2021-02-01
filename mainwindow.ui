@@ -57,7 +57,7 @@
      <x>0</x>
      <y>0</y>
      <width>573</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -74,9 +74,12 @@
      <string>&amp;Actions</string>
     </property>
     <addaction name="insertRowAction"/>
+    <addaction name="insertColumnAction"/>
+    <addaction name="insertChildAction"/>
+    <addaction name="separator"/>
+    <addaction name="removeColumnAction"/>
     <addaction name="removeRowAction"/>
     <addaction name="separator"/>
-    <addaction name="insertChildAction"/>
    </widget>
    <addaction name="fileMenu"/>
    <addaction name="actionsMenu"/>
@@ -105,22 +108,6 @@
     <string>Ctrl+R, R</string>
    </property>
   </action>
-  <action name="insertColumnAction">
-   <property name="text">
-    <string>Insert Column</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+I, C</string>
-   </property>
-  </action>
-  <action name="removeColumnAction">
-   <property name="text">
-    <string>Remove Column</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R, C</string>
-   </property>
-  </action>
   <action name="insertChildAction">
    <property name="text">
     <string>Insert Child</string>
@@ -137,6 +124,16 @@
   <action name="actionSave_to_file">
    <property name="text">
     <string>Save to file</string>
+   </property>
+  </action>
+  <action name="insertColumnAction">
+   <property name="text">
+    <string>Insert Column</string>
+   </property>
+  </action>
+  <action name="removeColumnAction">
+   <property name="text">
+    <string>Remove Column</string>
    </property>
   </action>
  </widget>

@@ -6,24 +6,25 @@
 
 #include <QMainWindow>
 
-class MainWindow : public QMainWindow, private Ui::MainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow, private Ui::MainWindow {
+		Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+		MainWindow(QWidget *parent = nullptr);
 
 private slots:
-    void insertChild();
-    void insertRow();
-    void removeRow();
+		void insertChild();
+		void insertColumn();
+		void insertRow();
+		void removeColumn();
+		void removeRow();
 
-    void on_open_file_clicked();
-    void on_save_file_clicked();
+		void on_open_file_clicked();
+		void on_save_file_clicked();
 
 private:
-    QMenu *fileMenu;
-    std::unique_ptr<XmlParser> xmlParser;
+		QMenu *fileMenu;
+		std::unique_ptr<XmlParser> xmlParser;
 };
 
 #endif // MAINWINDOW_H
