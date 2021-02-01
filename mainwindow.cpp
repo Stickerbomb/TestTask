@@ -5,6 +5,7 @@
 
 #include <QFile>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -19,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(insertChildAction, &QAction::triggered, this, &MainWindow::insertChild);
 	connect(actionOpen_file, &QAction::triggered, this, &MainWindow::on_open_file_clicked);
 	connect(actionSave_to_file, &QAction::triggered, this, &MainWindow::on_save_file_clicked);
+    connect(actionCalculate_Hash_of_file, &QAction::triggered, this, &MainWindow::fileChecksum);
 
 	xmlParser = std::make_unique<XmlParser>();
 }
@@ -114,4 +116,25 @@ void MainWindow::on_save_file_clicked() {
 			qDebug() << "Failed to write file";
 		}
 	}
+}
+
+void MainWindow::fileChecksum()
+{
+    QString selectedFilter;
+
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open"), ".", TypeFile::filtersList(), &selectedFilter);
+
+    QFile f(filename);
+    if (f.open(QFile::ReadOnly)) {
+        QCryptographicHash hash(QCryptographicHash::Algorithm::Md5);
+        if (hash.addData(&f)) {
+            QMessageBox msgBox;
+            msgBox.setText("Hash by Md5 alhorythm");
+            msgBox.setInformativeText(hash.result().toHex());
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            qDebug() << hash.result().toHex();
+            int ret = msgBox.exec();
+        }
+    }
 }

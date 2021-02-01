@@ -57,7 +57,7 @@
      <x>0</x>
      <y>0</y>
      <width>573</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -66,6 +66,7 @@
     </property>
     <addaction name="actionOpen_file"/>
     <addaction name="actionSave_to_file"/>
+    <addaction name="actionCalculate_Hash_of_file"/>
     <addaction name="separator"/>
     <addaction name="exitAction"/>
    </widget>
@@ -134,6 +135,11 @@
   <action name="removeColumnAction">
    <property name="text">
     <string>Remove Column</string>
+   </property>
+  </action>
+  <action name="actionCalculate_Hash_of_file">
+   <property name="text">
+    <string>Calculate Hash of file</string>
    </property>
   </action>
  </widget>

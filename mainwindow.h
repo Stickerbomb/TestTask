@@ -4,6 +4,7 @@
 #include "ui_mainwindow.h"
 #include "xmlparser.h"
 
+#include <QCryptographicHash>
 #include <QMainWindow>
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
@@ -20,7 +21,8 @@ private slots:
 		void removeRow();
 
 		void on_open_file_clicked();
-		void on_save_file_clicked();
+        void on_save_file_clicked();
+        void fileChecksum();
 
 private:
 		QMenu *fileMenu;
